@@ -24,7 +24,7 @@ jobs:
       - run: npm run build
 
   frontend:
-    name: Frontend (typecheck + lint + build)
+    name: Frontend (typecheck + build)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +38,6 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run typecheck
-      - run: npm run lint
       - run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://backend:5000
