@@ -1,0 +1,33 @@
+# ---- Secrets: never commit real credentials ----
+.env
+.env.local
+.env.production
+.env.development.local
+backend/.env
+frontend/.env.local
+
+# ---- Dependencies ----
+node_modules/
+
+# ---- Build output ----
+frontend/.next/
+frontend/out/
+backend/dist/
+frontend/tsconfig.tsbuildinfo
+
+# ---- Uploads (cloud-only; never keep local files) ----
+backend/uploads/
+uploads/
+
+# ---- Logs & temp ----
+*.log
+logs/
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# ---- Editor / OS ----
+.vscode/
+.idea/
+*.suo

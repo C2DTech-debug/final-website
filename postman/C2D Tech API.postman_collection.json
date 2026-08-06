@@ -1,0 +1,203 @@
+{
+  "info": {
+    "name": "C2D Tech API",
+    "description": "C2D Tech (Concept to Deploy) — public site, auth and admin/CRM endpoints.\n\nBase URL variable: `{{baseUrl}}` = `http://localhost:5000/api/v1`.\nRun **Auth > Login** first — its test script stores the access token in the `token` collection variable, which is attached automatically to every request via the collection Authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        { "name": "Site bundle", "request": { "method": "GET", "url": "{{baseUrl}}/public/bundle" } },
+        { "name": "Home bundle", "request": { "method": "GET", "url": "{{baseUrl}}/public/home" } },
+        { "name": "List services", "request": { "method": "GET", "url": "{{baseUrl}}/public/services" } },
+        { "name": "List portfolio", "request": { "method": "GET", "url": "{{baseUrl}}/public/portfolio" } },
+        { "name": "List team", "request": { "method": "GET", "url": "{{baseUrl}}/public/team" } },
+        { "name": "List testimonials", "request": { "method": "GET", "url": "{{baseUrl}}/public/testimonials" } },
+        { "name": "List FAQs", "request": { "method": "GET", "url": "{{baseUrl}}/public/faqs" } },
+        { "name": "Blogs (published)", "request": { "method": "GET", "url": "{{baseUrl}}/public/blogs?page=1&limit=12" } },
+        { "name": "Blog detail by slug", "request": { "method": "GET", "url": "{{baseUrl}}/public/blogs/sub-second-render-speed" } },
+        { "name": "Open jobs", "request": { "method": "GET", "url": "{{baseUrl}}/public/careers" } },
+        { "name": "Job detail by slug", "request": { "method": "GET", "url": "{{baseUrl}}/public/careers/frontend-developer-react" } },
+        {
+          "name": "Apply to job (multipart)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/public/careers/frontend-developer-react/apply",
+            "header": [{ "key": "Content-Type", "value": "multipart/form-data", "disabled": true }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "job", "value": "REPLACE_WITH_JOB_ID" },
+                { "key": "name", "value": "Jane Doe" },
+                { "key": "email", "value": "jane@example.com" },
+                { "key": "phone", "value": "+91 98765 43210" },
+                { "key": "coverLetter", "value": "I would love to join the C2D Tech squad." },
+                { "key": "resume", "type": "file", "src": [] }
+              ]
+            }
+          }
+        },
+        { "name": "SEO by page", "request": { "method": "GET", "url": "{{baseUrl}}/public/seo/home" } }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.data && json.data.accessToken) {",
+                  "  pm.collectionVariables.set('token', json.data.accessToken);",
+                  "}",
+                  "if (json.data && json.data.requiresTwoFactor) {",
+                  "  pm.collectionVariables.set('pendingToken', json.data.pendingToken || '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"admin@c2dtech.example.com\", \"password\": \"REPLACE_WITH_PASSWORD\" }"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Verify 2FA",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"code\": \"123456\", \"pendingToken\": \"{{pendingToken}}\" }" },
+            "url": "{{baseUrl}}/auth/login/2fa"
+          }
+        },
+        { "name": "Refresh", "request": { "method": "POST", "url": "{{baseUrl}}/auth/refresh" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout" } },
+        { "name": "Me", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+        { "name": "List admin users", "request": { "method": "GET", "url": "{{baseUrl}}/auth/users" } }
+      ]
+    },
+    {
+      "name": "Admin — CRM",
+      "item": [
+        { "name": "List leads", "request": { "method": "GET", "url": "{{baseUrl}}/admin/leads?page=1&limit=20&status=&q=" } },
+        {
+          "name": "Create lead",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"company\": \"Acme\",\n  \"email\": \"acme@example.com\",\n  \"phone\": \"+91 90000 00000\",\n  \"source\": \"website\",\n  \"priority\": \"medium\",\n  \"status\": \"new\"\n}"
+            },
+            "url": "{{baseUrl}}/admin/leads"
+          }
+        },
+        { "name": "Get lead", "request": { "method": "GET", "url": "{{baseUrl}}/admin/leads/{{leadId}}" } },
+        {
+          "name": "Update lead status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"status\": \"qualified\" }" },
+            "url": "{{baseUrl}}/admin/leads/{{leadId}}/status"
+          }
+        },
+        {
+          "name": "Assign lead",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"assignedTo\": \"ADMIN_USER_ID\" }" },
+            "url": "{{baseUrl}}/admin/leads/{{leadId}}/assign"
+          }
+        },
+        {
+          "name": "Add lead note",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"body\": \"Called — interested in the Starter plan.\" }" },
+            "url": "{{baseUrl}}/admin/leads/{{leadId}}/notes"
+          }
+        },
+        {
+          "name": "Add timeline entry",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"action\": \"call\", \"description\": \"Follow-up call booked.\" }" },
+            "url": "{{baseUrl}}/admin/leads/{{leadId}}/timeline"
+          }
+        },
+        { "name": "Kanban board", "request": { "method": "GET", "url": "{{baseUrl}}/admin/leads/kanban" } },
+        { "name": "Lead stats", "request": { "method": "GET", "url": "{{baseUrl}}/admin/leads/stats" } },
+        { "name": "Duplicate leads", "request": { "method": "GET", "url": "{{baseUrl}}/admin/leads/duplicates" } },
+        {
+          "name": "Merge leads",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"ids\": [\"id1\", \"id2\"], \"keep\": \"id1\" }" },
+            "url": "{{baseUrl}}/admin/leads/merge"
+          }
+        },
+        {
+          "name": "Import leads (multipart)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "multipart/form-data", "disabled": true }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] },
+            "url": "{{baseUrl}}/admin/leads/import"
+          }
+        },
+        { "name": "List contacts", "request": { "method": "GET", "url": "{{baseUrl}}/admin/contacts" } },
+        { "name": "List estimates", "request": { "method": "GET", "url": "{{baseUrl}}/admin/estimates" } }
+      ]
+    },
+    {
+      "name": "Admin — Content",
+      "item": [
+        { "name": "List blogs", "request": { "method": "GET", "url": "{{baseUrl}}/admin/blogs?page=1&limit=20" } },
+        { "name": "List jobs", "request": { "method": "GET", "url": "{{baseUrl}}/admin/careers?page=1&limit=20" } },
+        { "name": "List applications", "request": { "method": "GET", "url": "{{baseUrl}}/admin/careers/applications?page=1&limit=20" } },
+        { "name": "List services", "request": { "method": "GET", "url": "{{baseUrl}}/admin/services" } },
+        { "name": "List portfolio", "request": { "method": "GET", "url": "{{baseUrl}}/admin/portfolio" } },
+        { "name": "List team", "request": { "method": "GET", "url": "{{baseUrl}}/admin/team" } },
+        { "name": "List media", "request": { "method": "GET", "url": "{{baseUrl}}/admin/media" } },
+        { "name": "Get settings", "request": { "method": "GET", "url": "{{baseUrl}}/admin/settings" } }
+      ]
+    },
+    {
+      "name": "Admin — System",
+      "item": [
+        { "name": "Dashboard stats", "request": { "method": "GET", "url": "{{baseUrl}}/admin/dashboard" } },
+        { "name": "Activity log", "request": { "method": "GET", "url": "{{baseUrl}}/admin/activity?page=1&limit=20" } },
+        { "name": "Notifications", "request": { "method": "GET", "url": "{{baseUrl}}/admin/notifications?page=1&limit=20" } },
+        { "name": "Mark all notifications read", "request": { "method": "POST", "url": "{{baseUrl}}/admin/notifications/read-all" } },
+        { "name": "List roles", "request": { "method": "GET", "url": "{{baseUrl}}/admin/roles" } },
+        { "name": "List permissions", "request": { "method": "GET", "url": "{{baseUrl}}/admin/permissions" } },
+        { "name": "List SEO settings", "request": { "method": "GET", "url": "{{baseUrl}}/admin/seo" } }
+      ]
+    }
+  ]
+}
