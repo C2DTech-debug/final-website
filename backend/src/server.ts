@@ -20,6 +20,11 @@ async function bootstrap() {
 
   app.disable("x-powered-by");
 
+  // Render (and other proxies) forward X-Forwarded-For. Trusting the first hop
+  // makes req.ip reflect the real client IP and keeps express-rate-limit from
+  // throwing ERR_ERL_UNEXPECTED_X_FORWARDED_FOR on every rate-limited route.
+  app.set("trust proxy", env.isProduction ? 1 : false);
+
   // Security headers (CSP relaxed for admin + image CDNs)
   app.use(
     helmet({
