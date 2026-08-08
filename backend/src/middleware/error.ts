@@ -49,7 +49,7 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
   }
 
   const errorMeta = err instanceof Error ? (err.stack || `${err.name}: ${err.message}`) : String(err);
-  logger.error("[error] %s", errorMeta);
+  logger.error(errorMeta);
   const message = env.isProduction ? "Internal server error" : err instanceof Error ? err.message : String(err);
   res.status(500).json({ success: false, error: { code: "INTERNAL", message } });
 }

@@ -13,10 +13,12 @@ export function todayStr(d = new Date()): string {
 export async function clockIn(userId: string): Promise<void> {
   const date = todayStr();
   await AttendanceRecordModel.updateOne(
-    { user: userId, date, clockOut: { $exists: false } },
+    { user: userId, date },
     {
+      // Only the insert path sets status — a matched (existing) record must
+      // keep its earliest clockIn and its clockOut. Mixing $set and
+      // $setOnInsert for the same path makes MongoDB throw a conflict error.
       $setOnInsert: { user: userId, date, clockIn: new Date(), status: "present" },
-      $set: { status: "present" },
     },
     { upsert: true }
   );
