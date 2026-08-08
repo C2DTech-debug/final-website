@@ -1,12 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { LogOut, Moon, ShieldCheck, Sun } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { api } from "@/lib/api";
+import { hasPermission } from "@/lib/permissions";
 import type { AdminUser } from "@/types";
 import { cn, initials } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,9 +17,43 @@ import { AdminSidebar, AdminMobileNav } from "@/components/admin/admin-sidebar";
 import { PageLoader } from "@/components/ui/spinner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+const ROUTE_PERMISSIONS: [RegExp, string][] = [
+  [/^\/admin\/leads/, "leads:view"],
+  [/^\/admin\/estimates/, "leads:view"],
+  [/^\/admin\/analytics/, "analytics:view"],
+  [/^\/admin\/newsletter/, "content:view"],
+  [/^\/admin\/blogs/, "content:view"],
+  [/^\/admin\/careers/, "content:view"],
+  [/^\/admin\/portfolio/, "content:view"],
+  [/^\/admin\/services/, "content:view"],
+  [/^\/admin\/team/, "content:view"],
+  [/^\/admin\/testimonials/, "content:view"],
+  [/^\/admin\/faqs/, "content:view"],
+  [/^\/admin\/tasks\/my/, "tasks:view"],
+  [/^\/admin\/tasks/, "tasks:view_all"],
+  [/^\/admin\/attendance/, "attendance:view"],
+  [/^\/admin\/payroll/, "payroll:view"],
+  [/^\/admin\/media/, "media:manage"],
+  [/^\/admin\/seo/, "seo:manage"],
+  [/^\/admin\/settings/, "settings:manage"],
+  [/^\/admin\/notifications/, "dashboard:view"],
+  [/^\/admin\/roles/, "roles:manage"],
+  [/^\/admin\/users/, "users:manage"],
+  [/^\/admin\/activity/, "audit:view"],
+  [/^\/admin$/, "dashboard:view"],
+];
+
+function homeRoute(user: AdminUser): string {
+  if (hasPermission(user, "tasks:view")) return "/admin/tasks/my";
+  if (hasPermission(user, "attendance:view")) return "/admin/attendance";
+  if (hasPermission(user, "payroll:view")) return "/admin/payroll";
+  return "/admin";
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { token, user, setUser, logout } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [collapsed, setCollapsed] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
@@ -64,6 +100,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (!mounted || restoring || !token || !user) return <PageLoader label="Checking session…" />;
 
+  const routePermission = ROUTE_PERMISSIONS.find(([re]) => re.test(pathname))?.[1] ?? null;
+  const authorized = routePermission ? hasPermission(user, routePermission) : true;
+
+  if (!authorized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="max-w-md space-y-4 rounded-xl border p-8 text-center">
+          <ShieldCheck className="mx-auto h-10 w-10 text-destructive" />
+          <h1 className="font-display text-xl font-bold">Access denied</h1>
+          <p className="text-sm text-muted-foreground">
+            Your account doesn&apos;t have permission to view this page. If you believe this is a mistake, contact an administrator.
+          </p>
+          <Button asChild>
+            <Link href={homeRoute(user)}>Go to my dashboard</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen">
       <aside className="fixed inset-y-0 left-0 z-40 hidden md:block">
@@ -91,9 +147,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <div className="text-xs text-muted-foreground">{user.roleLabel}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/admin/settings")}>
-                <ShieldCheck className="mr-2 h-4 w-4" /> Settings
-              </DropdownMenuItem>
+              {hasPermission(user, "settings:manage") && (
+                <DropdownMenuItem onClick={() => router.push("/admin/settings")}>
+                  <ShieldCheck className="mr-2 h-4 w-4" /> Settings
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> Sign out
               </DropdownMenuItem>

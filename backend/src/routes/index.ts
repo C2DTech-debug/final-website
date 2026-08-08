@@ -9,6 +9,9 @@ import adminRoutes from "./adminRoutes";
 import mediaRoutes from "./mediaRoutes";
 import exportRoutes from "./exportRoutes";
 import analyticsRoutes, { trackVisit } from "./analyticsRoutes";
+import taskRoutes from "./taskRoutes";
+import attendanceRoutes from "./attendanceRoutes";
+import payrollRoutes from "./payrollRoutes";
 import { standardLimiter, strictLimiter } from "../middleware/rateLimit";
 
 const router = Router();
@@ -37,5 +40,8 @@ router.use("/auth", authRoutes);
 router.use("/admin", adminRoutes);
 router.use("/admin/media", mediaRoutes);
 router.use("/admin/export", exportRoutes);
+router.use("/admin/tasks", taskRoutes);
+router.use("/admin/attendance", attendanceRoutes);
+router.use("/admin/payroll", payrollRoutes);
 
 export default router;

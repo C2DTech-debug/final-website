@@ -3,7 +3,7 @@ import { PageVisitModel } from "../models/PageVisit";
 import { ContactMessageModel } from "../models/ContactMessage";
 import { ProjectEstimateModel } from "../models/ProjectEstimate";
 import { asyncHandler } from "../utils/asyncHandler";
-import { authenticate, isStaffOrAbove } from "../middleware/auth";
+import { authenticate, requirePermission } from "../middleware/auth";
 
 const router = Router();
 
@@ -29,7 +29,7 @@ export const trackVisit = asyncHandler(async (req, res) => {
   res.status(201).json({ success: true, data: { tracked: true } });
 });
 
-router.get("/overview", authenticate, isStaffOrAbove, asyncHandler(async (req, res) => {
+router.get("/overview", authenticate, requirePermission("analytics:view"), asyncHandler(async (req, res) => {
   const days = Math.min(90, Math.max(1, Number(req.query.days) || 30));
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 

@@ -8,6 +8,8 @@ import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { signAccessToken, signRefreshToken, verifyRefreshToken, generateRefreshTokenId, refreshTokenLifetimeMs } from "../services/tokenService";
 import { logActivity } from "../services/activityService";
+import { clockIn, clockOut } from "../services/attendanceService";
+import { getEffectivePermissions } from "../services/permissionService";
 import { ROLE_LABELS } from "../types";
 
 function setRefreshCookie(res: Response, token: string) {
@@ -55,6 +57,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   user.lastLoginAt = new Date();
   user.lastLoginIp = ip;
   await user.save();
+  await clockIn(user._id.toString());
 
   const accessToken = signAccessToken({ _id: user._id.toString(), email: user.email, role: user.role, name: user.name });
   const jti = generateRefreshTokenId();
@@ -64,7 +67,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   await logActivity({ user, action: "login", description: "Admin signed in", req });
 
-  res.status(200).json({ success: true, data: { accessToken, user: publicUser(user.toObject()) } });
+  const permissions = await getEffectivePermissions(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
 });
 
 export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) => {
@@ -94,6 +98,7 @@ export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) 
   user.lastLoginAt = new Date();
   user.lastLoginIp = req.ip || "";
   await user.save();
+  await clockIn(user._id.toString());
 
   const accessToken = signAccessToken({ _id: user._id.toString(), email: user.email, role: user.role, name: user.name });
   const jti = generateRefreshTokenId();
@@ -102,7 +107,8 @@ export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) 
   setRefreshCookie(res, refreshToken);
 
   await logActivity({ user, action: "login", description: "Admin signed in (2FA verified)", req });
-  res.status(200).json({ success: true, data: { accessToken, user: publicUser(user.toObject()) } });
+  const permissions = await getEffectivePermissions(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
 });
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
@@ -135,7 +141,8 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
   setRefreshCookie(res, newRefresh);
 
   const accessToken = signAccessToken({ _id: user._id.toString(), email: user.email, role: user.role, name: user.name });
-  res.status(200).json({ success: true, data: { accessToken, user: publicUser(user.toObject()) } });
+  const permissions = await getEffectivePermissions(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
@@ -149,6 +156,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
     // ignore malformed token
   }
   res.clearCookie("refreshToken", { path: "/" });
+  if (req.user) await clockOut(req.user._id);
   await logActivity({ user: req.user, action: "logout", description: "Admin signed out", req });
   res.status(200).json({ success: true, data: { message: "Logged out" } });
 });
@@ -156,7 +164,8 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
 export const me = asyncHandler(async (req: Request, res: Response) => {
   const user = await AdminUserModel.findById(req.user!._id);
   if (!user) throw ApiError.notFound("User not found");
-  res.status(200).json({ success: true, data: { user: publicUser(user.toObject()) } });
+  const permissions = await getEffectivePermissions(user.role);
+  res.status(200).json({ success: true, data: { user: { ...publicUser(user.toObject()), permissions } } });
 });
 
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {

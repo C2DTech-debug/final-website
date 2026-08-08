@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { ChevronsLeft, PanelLeft, Rocket } from "lucide-react";
 import { ADMIN_NAV, type AdminNavItem } from "@/constants";
 import { cn } from "@/lib/utils";
+import { hasPermission } from "@/lib/permissions";
+import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -20,16 +22,31 @@ export function AdminSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
+  const home = user
+    ? hasPermission(user, "dashboard:view")
+      ? "/admin"
+      : hasPermission(user, "tasks:view")
+        ? "/admin/tasks/my"
+        : hasPermission(user, "attendance:view")
+          ? "/admin/attendance"
+          : hasPermission(user, "payroll:view")
+            ? "/admin/payroll"
+            : "/admin"
+    : "/admin";
   const sections = React.useMemo(() => {
     const groups: Record<string, AdminNavItem[]> = { Overview: [] };
-    for (const item of ADMIN_NAV) (groups[item.section || "Overview"] ??= []).push(item);
+    for (const item of ADMIN_NAV) {
+      if (item.permission && !hasPermission(user, item.permission)) continue;
+      (groups[item.section || "Overview"] ??= []).push(item);
+    }
     return groups;
-  }, []);
+  }, [user]);
 
   return (
     <div className={cn("flex h-full flex-col border-r bg-muted/20", collapsed ? "w-16" : "w-64")}>
       <div className="flex h-16 items-center gap-2 border-b px-4">
-        <Link href="/admin" className="flex items-center gap-2 overflow-hidden">
+        <Link href={home} className="flex items-center gap-2 overflow-hidden">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-cyan-500">
             <Rocket className="h-4 w-4 text-white" />
           </span>

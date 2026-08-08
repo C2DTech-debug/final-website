@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate, isSuperAdmin, isAdminOrAbove } from "../middleware/auth";
+import { authenticate, requirePermission } from "../middleware/auth";
 import { authLimiter } from "../middleware/rateLimit";
 import { validate } from "../utils/asyncHandler";
 import {
@@ -32,9 +32,9 @@ router.post("/2fa/setup", authenticate, setupTwoFactor);
 router.post("/2fa/enable", authenticate, confirmTwoFactor);
 router.post("/2fa/disable", authenticate, disableTwoFactor);
 
-router.get("/users", authenticate, isAdminOrAbove, listUsers);
-router.post("/users", authenticate, isSuperAdmin, validate(createAdminUserSchema), createUser);
-router.put("/users/:id", authenticate, isSuperAdmin, validate(updateAdminUserSchema), updateUser);
-router.delete("/users/:id", authenticate, isSuperAdmin, deleteUser);
+router.get("/users", authenticate, requirePermission("users:manage"), listUsers);
+router.post("/users", authenticate, requirePermission("users:manage"), validate(createAdminUserSchema), createUser);
+router.put("/users/:id", authenticate, requirePermission("users:manage"), validate(updateAdminUserSchema), updateUser);
+router.delete("/users/:id", authenticate, requirePermission("users:manage"), deleteUser);
 
 export default router;

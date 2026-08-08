@@ -17,6 +17,7 @@ export const ROLES = [
   "project_manager",
   "marketing_manager",
   "content_editor",
+  "developer",
 ] as const;
 
 export type Role = (typeof ROLES)[number];
@@ -27,6 +28,7 @@ export const ROLE_LABELS: Record<Role, string> = {
   project_manager: "Project Manager",
   marketing_manager: "Marketing Manager",
   content_editor: "Content Editor",
+  developer: "Developer",
 };
 
 export const ROLE_LEVEL: Record<Role, number> = {
@@ -35,7 +37,48 @@ export const ROLE_LEVEL: Record<Role, number> = {
   project_manager: 3,
   marketing_manager: 2,
   content_editor: 1,
+  developer: 0,
 };
+
+/** Canonical permission names — mirrors backend/src/types/index.ts. */
+export const PERMISSIONS = [
+  "dashboard:view",
+  "audit:view",
+  "system:configure",
+  "leads:view",
+  "leads:create",
+  "leads:update",
+  "leads:delete",
+  "leads:assign",
+  "leads:export",
+  "contacts:view",
+  "contacts:reply",
+  "contacts:update",
+  "contacts:delete",
+  "content:view",
+  "content:create",
+  "content:update",
+  "content:delete",
+  "blogs:publish",
+  "media:manage",
+  "seo:manage",
+  "settings:manage",
+  "analytics:view",
+  "users:manage",
+  "roles:manage",
+  "tasks:view",
+  "tasks:view_all",
+  "tasks:create",
+  "tasks:update",
+  "tasks:delete",
+  "tasks:submit",
+  "tasks:verify",
+  "attendance:view",
+  "attendance:view_all",
+  "payroll:view",
+] as const;
+
+export type PermissionName = (typeof PERMISSIONS)[number];
 
 export const PORTFOLIO_STATUS = ["draft", "published", "hidden"] as const;
 export const LEAD_STATUS = ["new", "contacted", "qualified", "proposal_sent", "negotiation", "follow_up", "won", "lost", "on_hold"] as const;
@@ -106,6 +149,7 @@ export interface AdminUser {
   email: string;
   role: Role;
   roleLabel: string;
+  permissions?: string[];
   avatar?: string;
   phone?: string;
   isActive: boolean;
@@ -615,4 +659,96 @@ export interface RoleDoc {
 
 export interface GroupedPermissions {
   [module: string]: Permission[];
+}
+
+// ---------- Tasks ----------
+export const TASK_STATUSES = ["pending", "in_progress", "submitted", "completed", "rejected"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const TASK_STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  in_progress: "In Progress",
+  submitted: "Submitted",
+  completed: "Completed",
+  rejected: "Rejected",
+};
+
+export const TASK_PRIORITIES = ["low", "medium", "high"] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export const TASK_PRIORITY_LABELS: Record<string, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+};
+
+export interface Task {
+  _id: string;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  points: number;
+  assignedTo?: string | null;
+  assignee?: { _id: string; name: string; email: string; role: string } | null;
+  createdBy?: string | null;
+  dueDate?: string | null;
+  submissionNote?: string;
+  submissionUrl?: string;
+  submittedAt?: string | null;
+  verifiedAt?: string | null;
+  verifiedBy?: string | null;
+  rejectedAt?: string | null;
+  rejectionReason?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TaskStats {
+  pending: number;
+  inProgress: number;
+  submitted: number;
+  completed: number;
+  rejected: number;
+  totalEarned: number;
+}
+
+// ---------- Attendance ----------
+export interface AttendanceRecord {
+  _id?: string;
+  user?: string | { _id: string; name: string; email: string; role: string };
+  date: string;
+  clockIn?: string | null;
+  clockOut?: string | null;
+  status: string;
+  totalSeconds?: number;
+}
+
+export interface TeamAttendanceRow {
+  user: { _id: string; name: string; email: string; role: string; avatar?: string };
+  present: number;
+  halfDay: number;
+  absent: number;
+  totalSeconds: number;
+  records: AttendanceRecord[];
+}
+
+export interface TodayAttendance {
+  user: { _id: string; name: string; email: string; role: string; avatar?: string };
+  record: AttendanceRecord | null;
+}
+
+// ---------- Payroll ----------
+export interface PayrollRow {
+  user: { _id: string; name: string; email: string; role: string };
+  points: number;
+  tasksCompleted: number;
+  presentDays: number;
+  halfDays: number;
+}
+
+export interface PayrollSummary {
+  year: number;
+  month: number;
+  rows: PayrollRow[];
 }

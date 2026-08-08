@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../services/tokenService";
 import { ApiError } from "../utils/ApiError";
 import { AdminUserModel } from "../models/AdminUser";
+import { getEffectivePermissions } from "../services/permissionService";
 
 export interface AuthUser {
   _id: string;
@@ -66,3 +67,18 @@ export const isSuperAdmin = requireRole(5);
 export const isAdminOrAbove = requireRole(4);
 export const isManagerOrAbove = requireRole(3);
 export const isStaffOrAbove = requireRole(1);
+
+/**
+ * Require any of the given permissions. The user's role resolves to an
+ * effective permission set (built-in map ∪ Role document). `super_admin`
+ * always passes. The backend is the final authority — no UI check can bypass.
+ */
+export function requirePermission(...required: string[]) {
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.user) return next(ApiError.unauthorized());
+    const perms = await getEffectivePermissions(req.user.role);
+    const allowed = perms.some((p) => required.includes(p));
+    if (!allowed) return next(ApiError.forbidden("Insufficient permissions"));
+    next();
+  };
+}

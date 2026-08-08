@@ -4,6 +4,7 @@ import { PermissionModel } from "../models/Permission";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { logActivity } from "../services/activityService";
+import { invalidateRoleCache } from "../services/permissionService";
 
 export const listRoles = asyncHandler(async (_req: Request, res: Response) => {
   const roles = await RoleModel.find().sort({ level: -1 }).lean();
@@ -34,6 +35,7 @@ export const updateRole = asyncHandler(async (req: Request, res: Response) => {
   }
   Object.assign(role, body);
   await role.save();
+  invalidateRoleCache(role.name);
   await logActivity({ user: req.user, action: "update", entity: "role", entityId: req.params.id, description: `Updated role "${role.label}"`, req });
   res.status(200).json({ success: true, data: role });
 });

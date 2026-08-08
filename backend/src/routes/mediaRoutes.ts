@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { authenticate, isManagerOrAbove } from "../middleware/auth";
+import { authenticate, requirePermission } from "../middleware/auth";
 import { uploadMedia, listMedia, deleteMedia } from "../controllers/mediaController";
 
 const router = Router();
@@ -18,8 +18,8 @@ const upload = multer({
   },
 });
 
-router.get("/", authenticate, isManagerOrAbove, listMedia);
-router.post("/", authenticate, isManagerOrAbove, upload.single("file"), uploadMedia);
-router.delete("/:id", authenticate, isManagerOrAbove, deleteMedia);
+router.get("/", authenticate, requirePermission("media:manage"), listMedia);
+router.post("/", authenticate, requirePermission("media:manage"), upload.single("file"), uploadMedia);
+router.delete("/:id", authenticate, requirePermission("media:manage"), deleteMedia);
 
 export default router;

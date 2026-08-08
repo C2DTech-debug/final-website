@@ -4,6 +4,7 @@ import type {
   AdminUser,
   ActivityLog,
   AnalyticsOverview,
+  AttendanceRecord,
   Blog,
   DashboardStats,
   DuplicateGroup,
@@ -17,12 +18,17 @@ import type {
   MediaAsset,
   NewsletterSubscriber,
   Notification,
+  PayrollSummary,
   Permission,
   ProjectEstimate,
   RoleDoc,
   SeoSetting,
   SettingDoc,
   SettingsMap,
+  Task,
+  TaskStats,
+  TeamAttendanceRow,
+  TodayAttendance,
 } from "@/types";
 
 // ---------- Auth ----------
@@ -567,4 +573,107 @@ export function useClearCache() {
 export function exportUrl(type: string, format: "csv" | "excel" | "pdf", params: Record<string, string> = {}) {
   const token = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("c2d-admin-auth") || "{}")?.state?.token || "" : "";
   return `/api/v1/admin/export/${type}/${format}${qs({ ...params, token })}`;
+}
+
+// ---------- Tasks ----------
+export const taskKeys = {
+  my: (p: Record<string, string>) => ["admin", "tasks", "my", p] as const,
+  myStats: ["admin", "tasks", "my", "stats"] as const,
+  list: (p: Record<string, string>) => ["admin", "tasks", p] as const,
+};
+
+export function useMyTasks(params: Record<string, string> = {}) {
+  return useQuery({ queryKey: taskKeys.my(params), queryFn: () => api.get<Task[]>(`/api/v1/admin/tasks/my${qs(params)}`) });
+}
+
+export function useMyTaskStats() {
+  return useQuery({ queryKey: taskKeys.myStats, queryFn: () => api.get<TaskStats>("/api/v1/admin/tasks/my/stats") });
+}
+
+export function useAllTasks(params: Record<string, string> = {}) {
+  return useQuery({ queryKey: taskKeys.list(params), queryFn: () => api.get<Task[]>(`/api/v1/admin/tasks${qs(params)}`) });
+}
+
+export function useCreateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<Task> & { assignedTo: string }) => api.post<Task>("/api/v1/admin/tasks", body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
+  });
+}
+
+export function useUpdateTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Partial<Task> }) => api.put<Task>(`/api/v1/admin/tasks/${id}`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
+  });
+}
+
+export function useDeleteTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ message: string }>(`/api/v1/admin/tasks/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
+  });
+}
+
+export function useSubmitTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: { submissionNote?: string; submissionUrl?: string } }) =>
+      api.post<Task>(`/api/v1/admin/tasks/${id}/submit`, body),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
+  });
+}
+
+export function useVerifyTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, action, rejectionReason }: { id: string; action: "approve" | "reject"; rejectionReason?: string }) =>
+      api.post<Task>(`/api/v1/admin/tasks/${id}/verify`, { action, rejectionReason }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
+  });
+}
+
+// ---------- Attendance ----------
+export const attendanceKeys = {
+  my: (y: number, m: number) => ["admin", "attendance", "my", y, m] as const,
+  myToday: ["admin", "attendance", "my", "today"] as const,
+  list: (y: number, m: number) => ["admin", "attendance", y, m] as const,
+  today: ["admin", "attendance", "today"] as const,
+};
+
+export function useMyAttendance(year: number, month: number) {
+  return useQuery({
+    queryKey: attendanceKeys.my(year, month),
+    queryFn: () => api.get<AttendanceRecord[]>(`/api/v1/admin/attendance/my${qs({ year, month })}`),
+  });
+}
+
+export function useMyToday() {
+  return useQuery({ queryKey: attendanceKeys.myToday, queryFn: () => api.get<AttendanceRecord | null>("/api/v1/admin/attendance/my/today") });
+}
+
+export function useTeamAttendance(year: number, month: number) {
+  return useQuery({
+    queryKey: attendanceKeys.list(year, month),
+    queryFn: () => api.get<TeamAttendanceRow[]>(`/api/v1/admin/attendance${qs({ year, month })}`),
+  });
+}
+
+export function useTeamToday() {
+  return useQuery({ queryKey: attendanceKeys.today, queryFn: () => api.get<TodayAttendance[]>("/api/v1/admin/attendance/today") });
+}
+
+// ---------- Payroll ----------
+export const payrollKeys = {
+  summary: (y: number, m: number) => ["admin", "payroll", y, m] as const,
+};
+
+export function usePayrollSummary(year: number, month: number) {
+  return useQuery({
+    queryKey: payrollKeys.summary(year, month),
+    queryFn: () => api.get<PayrollSummary>(`/api/v1/admin/payroll/summary${qs({ year, month })}`),
+  });
 }

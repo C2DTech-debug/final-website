@@ -18,6 +18,10 @@ import {
   Briefcase,
   Bell,
   ShieldCheck,
+  ListTodo,
+  ClipboardList,
+  CalendarClock,
+  Coins,
 } from "lucide-react";
 
 export const SITE_NAME = "C2D Tech";
@@ -152,28 +156,33 @@ export interface AdminNavItem {
   icon: LucideIcon;
   section?: string;
   badge?: string;
+  permission?: string;
 }
 
 export const ADMIN_NAV: AdminNavItem[] = [
-  { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { title: "Leads", href: "/admin/leads", icon: Users, badge: "CRM" },
-  { title: "Estimates", href: "/admin/estimates", icon: Calculator },
-  { title: "Analytics", href: "/admin/analytics", icon: BarChart3 },
-  { title: "Newsletter", href: "/admin/newsletter", icon: Mail },
-  { title: "Blog", href: "/admin/blogs", icon: FileText, section: "Content" },
-  { title: "Careers", href: "/admin/careers", icon: Briefcase, section: "Content" },
-  { title: "Portfolio", href: "/admin/portfolio", icon: FolderKanban, section: "Content" },
-  { title: "Services", href: "/admin/services", icon: Layers, section: "Content" },
-  { title: "Team", href: "/admin/team", icon: UserCog, section: "Content" },
-  { title: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote, section: "Content" },
-  { title: "FAQs", href: "/admin/faqs", icon: HelpCircle, section: "Content" },
-  { title: "Media Library", href: "/admin/media", icon: Image, section: "Tools" },
-  { title: "SEO Manager", href: "/admin/seo", icon: Search, section: "Tools" },
-  { title: "Website Settings", href: "/admin/settings", icon: Settings, section: "Tools" },
-  { title: "Notifications", href: "/admin/notifications", icon: Bell, section: "Tools" },
-  { title: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck, section: "Tools" },
-  { title: "Users & Roles", href: "/admin/users", icon: Users, section: "Tools" },
-  { title: "Activity Logs", href: "/admin/activity", icon: ScrollText, section: "Tools" },
+  { title: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard:view" },
+  { title: "Leads", href: "/admin/leads", icon: Users, badge: "CRM", permission: "leads:view" },
+  { title: "Estimates", href: "/admin/estimates", icon: Calculator, permission: "leads:view" },
+  { title: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics:view" },
+  { title: "Newsletter", href: "/admin/newsletter", icon: Mail, permission: "content:view" },
+  { title: "Blog", href: "/admin/blogs", icon: FileText, section: "Content", permission: "content:view" },
+  { title: "Careers", href: "/admin/careers", icon: Briefcase, section: "Content", permission: "content:view" },
+  { title: "Portfolio", href: "/admin/portfolio", icon: FolderKanban, section: "Content", permission: "content:view" },
+  { title: "Services", href: "/admin/services", icon: Layers, section: "Content", permission: "content:view" },
+  { title: "Team", href: "/admin/team", icon: UserCog, section: "Content", permission: "content:view" },
+  { title: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote, section: "Content", permission: "content:view" },
+  { title: "FAQs", href: "/admin/faqs", icon: HelpCircle, section: "Content", permission: "content:view" },
+  { title: "My Tasks", href: "/admin/tasks/my", icon: ClipboardList, section: "Tasks", permission: "tasks:view" },
+  { title: "Tasks", href: "/admin/tasks", icon: ListTodo, section: "Tasks", permission: "tasks:view_all" },
+  { title: "Attendance", href: "/admin/attendance", icon: CalendarClock, section: "Tasks", permission: "attendance:view" },
+  { title: "Points & Payroll", href: "/admin/payroll", icon: Coins, section: "Tasks", permission: "payroll:view" },
+  { title: "Media Library", href: "/admin/media", icon: Image, section: "Tools", permission: "media:manage" },
+  { title: "SEO Manager", href: "/admin/seo", icon: Search, section: "Tools", permission: "seo:manage" },
+  { title: "Website Settings", href: "/admin/settings", icon: Settings, section: "Tools", permission: "settings:manage" },
+  { title: "Notifications", href: "/admin/notifications", icon: Bell, section: "Tools", permission: "dashboard:view" },
+  { title: "Roles & Permissions", href: "/admin/roles", icon: ShieldCheck, section: "Tools", permission: "roles:manage" },
+  { title: "Users & Roles", href: "/admin/users", icon: Users, section: "Tools", permission: "users:manage" },
+  { title: "Activity Logs", href: "/admin/activity", icon: ScrollText, section: "Tools", permission: "audit:view" },
 ];
 
 export const SERVICE_ICON_OPTIONS = [
