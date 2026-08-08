@@ -112,7 +112,12 @@ export const submitTask = asyncHandler(async (req: Request, res: Response) => {
   const task = await TaskModel.findById(req.params.id);
   if (!task) throw ApiError.notFound("Task not found");
   const isAssignee = task.assignedTo && String(task.assignedTo) === req.user!._id;
-  if (!isAssignee && req.user!.role !== "super_admin") throw ApiError.forbidden("Only the assignee can submit this task");
+  if (!isAssignee && req.user!.role !== "super_admin") {
+    // Assignees always submit their own tasks; anyone else needs the
+    // tasks:submit permission (e.g. a manager submitting on their behalf).
+    const perms = await getEffectivePermissions(req.user!.role);
+    if (!perms.includes("tasks:submit")) throw ApiError.forbidden("Only the assignee can submit this task");
+  }
   if (task.status === "completed") throw ApiError.badRequest("Task already completed");
 
   const { submissionNote, submissionUrl } = req.body;

@@ -21,7 +21,7 @@ router.get("/:id", authenticate, requirePermission("tasks:view"), getTask);
 router.post("/", authenticate, requirePermission("tasks:create"), createTask);
 router.put("/:id", authenticate, requirePermission("tasks:update"), updateTask);
 router.delete("/:id", authenticate, requirePermission("tasks:delete"), deleteTask);
-router.post("/:id/submit", authenticate, requirePermission("tasks:submit"), submitTask);
+router.post("/:id/submit", authenticate, submitTask);
 router.post("/:id/verify", authenticate, requirePermission("tasks:verify"), verifyTask);
 
 export default router;
