@@ -6,17 +6,17 @@ import { usePublicPortfolio } from "@/hooks/useSite";
 import { PageHeader } from "@/components/site/page-header";
 import { PortfolioCard } from "@/components/site/portfolio-card";
 import { Stagger } from "@/components/site/reveal";
+import { BrandedLoader } from "@/components/site/branded-loader";
+import { PortfolioEmptyState, PortfolioNoResults, PortfolioErrorState } from "@/components/site/portfolio-states";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 
 function PortfolioContent() {
   const [category, setCategory] = React.useState("All");
   const [q, setQ] = React.useState("");
   const [debouncedQ, setDebouncedQ] = React.useState("");
-  const { data, isLoading } = usePublicPortfolio({ category, q: debouncedQ });
+  const { data, isLoading, isError, refetch } = usePublicPortfolio({ category, q: debouncedQ });
 
   React.useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 350);
@@ -25,15 +25,23 @@ function PortfolioContent() {
 
   const categories = data?.meta?.categories ?? [];
   const projects = data?.data ?? [];
+  // Categories are derived from published projects, so a non-empty list means
+  // projects genuinely exist even when the current filter returns nothing.
+  const hasProjects = projects.length > 0 || categories.length > 0;
+  const hasActiveFilters = category !== "All" || q !== "";
+
+  const clearFilters = () => {
+    setCategory("All");
+    setQ("");
+    setDebouncedQ("");
+  };
 
   if (isLoading) {
-    return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-72 rounded-2xl" />
-        ))}
-      </div>
-    );
+    return <BrandedLoader label="Loading the portfolio…" />;
+  }
+
+  if (isError && !data) {
+    return <PortfolioErrorState onRetry={() => refetch()} />;
   }
 
   return (
@@ -64,19 +72,22 @@ function PortfolioContent() {
       </div>
 
       {projects.length ? (
-        <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <PortfolioCard key={project._id} project={project} />
-          ))}
-        </Stagger>
+        <>
+          <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {projects.map((project) => (
+              <PortfolioCard key={project._id} project={project} />
+            ))}
+          </Stagger>
+          {hasActiveFilters && (
+            <div className="mt-10 flex justify-center">
+              <Button variant="outline" onClick={clearFilters}>Clear filters</Button>
+            </div>
+          )}
+        </>
+      ) : hasProjects ? (
+        <PortfolioNoResults onClear={clearFilters} hasActiveFilters={hasActiveFilters} />
       ) : (
-        <EmptyState title="No projects found" description="Try adjusting your search or filters." />
-      )}
-
-      {projects.length > 0 && (
-        <div className="mt-12 flex justify-center">
-          <Button variant="outline" onClick={() => { setCategory("All"); setQ(""); }}>Clear filters</Button>
-        </div>
+        <PortfolioEmptyState />
       )}
     </>
   );

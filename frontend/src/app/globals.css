@@ -112,6 +112,41 @@
   }
 }
 
+@keyframes c2d-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes c2d-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
+}
+
+@layer utilities {
+  .animate-c2d-float {
+    animation: c2d-float 2.4s ease-in-out infinite;
+  }
+  .animate-c2d-slide {
+    animation: c2d-slide 1.6s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-c2d-float,
+  .animate-c2d-slide {
+    animation: none;
+  }
+}
+
 /* Recharts tooltip dark-mode polish */
 .recharts-default-tooltip {
   border-radius: 0.5rem !important;

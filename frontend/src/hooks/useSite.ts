@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { api, apiFetchPaginated, qs } from "@/lib/api";
 import type {
   HomeBundle,
@@ -50,6 +50,7 @@ export function usePublicPortfolio(params: { category?: string; q?: string } = {
   return useQuery({
     queryKey: siteKeys.portfolio(params),
     queryFn: () => apiFetchPaginated<PortfolioProject, { categories: string[] }>(`/api/v1/public/portfolio${qs(params)}`),
+    placeholderData: keepPreviousData,
   });
 }
 
