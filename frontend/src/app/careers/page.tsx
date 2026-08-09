@@ -19,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: seo?.title || "Careers — C2D Tech",
     description: seo?.description || "Join the C2D Tech developer friends squad. Open roles across engineering, design and marketing.",
     keywords: seo?.keywords,
+    alternates: { canonical: "/careers" },
   };
 }
 

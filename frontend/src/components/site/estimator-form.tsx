@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { Calculator, Clock, IndianRupee, Sparkles } from "lucide-react";
 import { useEstimatorConfig, fetchQuote, submitEstimate } from "@/hooks/useSite";
+import { estimateFormSchema, handleNumericPaste } from "@/lib/validations";
 import { formatINR } from "@/lib/utils";
 import { ServiceIcon } from "@/components/site/service-icon";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
+import { FormError } from "@/components/ui/form-error";
 import type { QuoteResult } from "@/types";
+
+interface DetailErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
 
 export function EstimatorForm() {
   const { data: config, isLoading } = useEstimatorConfig();
@@ -24,6 +32,7 @@ export function EstimatorForm() {
   const [selectedAddons, setSelectedAddons] = React.useState<string[]>([]);
   const [quote, setQuote] = React.useState<QuoteResult | null>(null);
   const [form, setForm] = React.useState({ name: "", email: "", phone: "", notes: "" });
+  const [errors, setErrors] = React.useState<DetailErrors>({});
 
   const quoteMutation = useMutation({
     mutationFn: () => fetchQuote(selected, selectedAddons),
@@ -39,6 +48,7 @@ export function EstimatorForm() {
       setSelected([]);
       setSelectedAddons([]);
       setForm({ name: "", email: "", phone: "", notes: "" });
+      setErrors({});
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : "Submission failed"),
   });
@@ -50,6 +60,31 @@ export function EstimatorForm() {
 
   const toggle = (list: string[], setList: (v: string[]) => void, value: string) =>
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+
+  const handleDetailsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = estimateFormSchema.safeParse({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      services: selected,
+      addons: selectedAddons,
+      notes: form.notes,
+    });
+    if (!parsed.success) {
+      const next: DetailErrors = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0] as keyof DetailErrors;
+        if (field === "name" || field === "email" || field === "phone") {
+          if (!next[field]) next[field] = issue.message;
+        }
+      }
+      setErrors(next);
+      return;
+    }
+    setErrors({});
+    submitMutation.mutate();
+  };
 
   if (isLoading) {
     return (
@@ -124,35 +159,86 @@ export function EstimatorForm() {
           </div>
         )}
 
-        <div className="rounded-2xl border bg-card p-6 md:p-8">
+        <form noValidate onSubmit={handleDetailsSubmit} className="rounded-2xl border bg-card p-6 md:p-8">
           <h2 className="font-display text-xl font-semibold">Your details</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="est-name">Name *</Label>
-              <Input id="est-name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your name" />
+              <Input
+                id="est-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Your name"
+                autoComplete="name"
+                error={Boolean(errors.name)}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? "est-name-error" : undefined}
+              />
+              <FormError id="est-name-error" message={errors.name} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="est-email">Email *</Label>
-              <Input id="est-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@company.com" />
+              <Input
+                id="est-email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="you@company.com"
+                autoComplete="email"
+                error={Boolean(errors.email)}
+                aria-invalid={Boolean(errors.email)}
+                aria-describedby={errors.email ? "est-email-error" : undefined}
+              />
+              <FormError id="est-email-error" message={errors.email} />
             </div>
           </div>
           <div className="mt-4 space-y-2">
             <Label htmlFor="est-phone">Phone</Label>
-            <Input id="est-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+91 …" />
+            <Input
+              id="est-phone"
+              value={form.phone}
+              onChange={(e) => {
+                setForm({ ...form, phone: e.target.value });
+                if (errors.phone) setErrors((p) => ({ ...p, phone: undefined }));
+              }}
+              onPaste={(e) =>
+                handleNumericPaste(
+                  e,
+                  10,
+                  (v) => setForm((f) => ({ ...f, phone: v })),
+                  (m) => setErrors((p) => ({ ...p, phone: m })),
+                  "Enter a valid 10-digit mobile number.",
+                )
+              }
+              placeholder="10-digit mobile number"
+              autoComplete="tel"
+              inputMode="numeric"
+              maxLength={10}
+              error={Boolean(errors.phone)}
+              aria-invalid={Boolean(errors.phone)}
+              aria-describedby={errors.phone ? "est-phone-error" : undefined}
+            />
+            <FormError id="est-phone-error" message={errors.phone} />
           </div>
           <div className="mt-4 space-y-2">
             <Label htmlFor="est-notes">Project notes</Label>
-            <Textarea id="est-notes" rows={4} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Anything we should know?" />
+            <Textarea
+              id="est-notes"
+              rows={4}
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Anything we should know?"
+            />
           </div>
           <Button
+            type="submit"
             className="mt-6 w-full"
             size="lg"
-            disabled={selected.length === 0 || !form.name || !form.email || submitMutation.isPending}
-            onClick={() => submitMutation.mutate()}
+            disabled={selected.length === 0 || submitMutation.isPending}
           >
             {submitMutation.isPending ? <Spinner /> : "Submit for a detailed quote"}
           </Button>
-        </div>
+        </form>
       </div>
 
       <div>

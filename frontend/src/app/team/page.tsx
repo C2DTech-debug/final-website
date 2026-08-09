@@ -17,6 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: seo?.title || "Our Team",
     description: seo?.description || "Meet the developer friends squad at C2D Tech in Trichy.",
     keywords: seo?.keywords,
+    alternates: { canonical: "/team" },
   };
 }
 

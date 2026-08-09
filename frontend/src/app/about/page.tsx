@@ -16,6 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: seo?.title || "About Us",
     description: seo?.description || "C2D Tech — a developer friends squad in Trichy taking products from concept to deploy.",
     keywords: seo?.keywords,
+    alternates: { canonical: "/about" },
   };
 }
 

@@ -29,6 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: service.seo?.title || `${service.name} — C2D Tech`,
     description: service.seo?.description || service.shortDescription || service.tagline,
     keywords: service.seo?.keywords,
+    alternates: { canonical: `/services/${slug}` },
   };
 }
 

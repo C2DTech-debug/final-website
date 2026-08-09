@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: seo?.title || undefined,
     description: seo?.description || undefined,
     keywords: seo?.keywords || undefined,
+    alternates: { canonical: "/" },
     openGraph: seo?.ogTitle
       ? { title: seo.ogTitle, description: seo.ogDescription, images: seo.ogImage ? [seo.ogImage] : undefined }
       : undefined,

@@ -13,6 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: seo?.title || "Project Estimator",
     description: seo?.description || "Get an instant estimate for your software project in under a minute.",
     keywords: seo?.keywords,
+    alternates: { canonical: "/estimator" },
   };
 }
 

@@ -13,6 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: seo?.title || "Sitemap — C2D Tech",
     description: seo?.description || "Browse all pages, services, portfolio projects, blog posts and job openings at C2D Tech.",
+    alternates: { canonical: "/sitemap" },
   };
 }
 

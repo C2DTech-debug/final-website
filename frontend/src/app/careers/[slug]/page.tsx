@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: job.seo?.title || `${job.title} — Careers at C2D Tech`,
     description: job.seo?.description || job.description?.slice(0, 160),
+    alternates: { canonical: `/careers/${slug}` },
   };
 }
 

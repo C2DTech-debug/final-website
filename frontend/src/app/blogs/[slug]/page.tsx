@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.seo?.title || `${post.title} — C2D Tech Blog`,
     description: post.seo?.description || post.excerpt,
     keywords: post.seo?.keywords,
+    alternates: { canonical: `/blogs/${slug}` },
     openGraph: post.coverImage ? { images: [post.coverImage] } : undefined,
   };
 }

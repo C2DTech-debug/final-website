@@ -6,12 +6,19 @@ const nameSchema = z.string().trim().min(2, "Name must be at least 2 characters"
 
 export const recaptchaSchema = z.string().max(2048).optional().default("");
 
+export const indianMobileSchema = z
+  .string()
+  .trim()
+  .refine((v) => v === "" || /^[6-9]\d{9}$/.test(v), "Enter a valid 10-digit Indian mobile number")
+  .optional()
+  .default("");
+
 // ---------- Public ----------
 
 export const contactFormSchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  phone: z.string().trim().max(30).optional().default(""),
+  phone: indianMobileSchema,
   service: z.string().trim().max(120).optional().default(""),
   budget: z.string().trim().max(80).optional().default(""),
   timeline: z.string().trim().max(80).optional().default(""),
@@ -29,7 +36,7 @@ export const newsletterSchema = z.object({
 export const estimateSchema = z.object({
   name: nameSchema,
   email: emailSchema,
-  phone: z.string().trim().max(30).optional().default(""),
+  phone: indianMobileSchema,
   services: z.array(z.string().max(80)).min(1, "Select at least one service"),
   addons: z.array(z.string().max(120)).optional().default([]),
   notes: z.string().trim().max(2000).optional().default(""),
@@ -262,7 +269,7 @@ export const jobApplicationSchema = z.object({
   job: z.string().regex(/^[a-fA-F0-9]{24}$/),
   name: nameSchema,
   email: emailSchema,
-  phone: z.string().max(30).optional().default(""),
+  phone: indianMobileSchema,
   resumeUrl: z.string().max(600).optional().default(""),
   resumeName: z.string().max(200).optional().default(""),
   coverLetter: z.string().max(5000).optional().default(""),

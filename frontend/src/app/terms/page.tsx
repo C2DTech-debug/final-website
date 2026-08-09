@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/site/legal-page";
 
-export const metadata: Metadata = { title: "Terms of Service", robots: { index: true, follow: true } };
+export const metadata: Metadata = { title: "Terms of Service", robots: { index: true, follow: true }, alternates: { canonical: "/terms" } };
 
 export default function TermsPage() {
   return (

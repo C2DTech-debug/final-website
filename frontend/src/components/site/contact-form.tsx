@@ -4,15 +4,15 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
-import { ContactFormValues, contactFormSchema } from "@/lib/validations";
-import { submitContact } from "@/hooks/useSite";
+import { ContactFormValues, contactFormSchema, handleNumericPaste } from "@/lib/validations";
+import { submitContact, usePublicServices } from "@/hooks/useSite";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FormError } from "@/components/ui/form-error";
 import { Spinner } from "@/components/ui/spinner";
-import { usePublicServices } from "@/hooks/useSite";
 
 const BUDGETS = ["Under ₹50k", "₹50k – ₹2L", "₹2L – ₹5L", "₹5L – ₹10L", "₹10L+"];
 const TIMELINES = ["ASAP", "1 month", "1–3 months", "3–6 months", "Flexible"];
@@ -31,35 +31,81 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
     setValue,
     watch,
     reset,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
+    mode: "onBlur",
     defaultValues: { name: "", email: "", phone: "", service: defaultService, budget: "", timeline: "", message: "" },
   });
 
+  const phoneRegister = register("phone");
+
   return (
     <form
+      noValidate
       onSubmit={handleSubmit((values) => mutation.mutate(values, { onSuccess: () => reset() }))}
       className="space-y-4"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cf-name">Name *</Label>
-          <Input id="cf-name" placeholder="Your name" {...register("name")} />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+          <Input
+            id="cf-name"
+            placeholder="Your name"
+            autoComplete="name"
+            error={Boolean(errors.name)}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "cf-name-error" : undefined}
+            {...register("name")}
+          />
+          <FormError id="cf-name-error" message={errors.name?.message} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="cf-email">Email *</Label>
-          <Input id="cf-email" type="email" placeholder="you@company.com" {...register("email")} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Input
+            id="cf-email"
+            type="email"
+            placeholder="you@company.com"
+            autoComplete="email"
+            error={Boolean(errors.email)}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "cf-email-error" : undefined}
+            {...register("email")}
+          />
+          <FormError id="cf-email-error" message={errors.email?.message} />
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="cf-phone">Phone</Label>
-          <Input id="cf-phone" placeholder="+91 …" {...register("phone")} />
-          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+          <Input
+            id="cf-phone"
+            placeholder="10-digit mobile number"
+            autoComplete="tel"
+            inputMode="numeric"
+            maxLength={10}
+            error={Boolean(errors.phone)}
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? "cf-phone-error" : undefined}
+            {...phoneRegister}
+            onPaste={(e) =>
+              handleNumericPaste(
+                e,
+                10,
+                (v) => setValue("phone", v),
+                (m) => setError("phone", { type: "manual", message: m }),
+                "Enter a valid 10-digit mobile number.",
+              )
+            }
+            onChange={(e) => {
+              phoneRegister.onChange(e);
+              if (errors.phone) clearErrors("phone");
+            }}
+          />
+          <FormError id="cf-phone-error" message={errors.phone?.message} />
         </div>
         <div className="space-y-2">
           <Label>Service</Label>
@@ -114,8 +160,16 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
 
       <div className="space-y-2">
         <Label htmlFor="cf-message">Project Details *</Label>
-        <Textarea id="cf-message" rows={5} placeholder="Tell us about your project…" {...register("message")} />
-        {errors.message && <p className="text-xs text-destructive">{errors.message.message}</p>}
+        <Textarea
+          id="cf-message"
+          rows={5}
+          placeholder="Tell us about your project…"
+          error={Boolean(errors.message)}
+          aria-invalid={Boolean(errors.message)}
+          aria-describedby={errors.message ? "cf-message-error" : undefined}
+          {...register("message")}
+        />
+        <FormError id="cf-message-error" message={errors.message?.message} />
       </div>
 
       <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending}>

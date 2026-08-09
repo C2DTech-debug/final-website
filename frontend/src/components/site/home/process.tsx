@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { PublicSettings } from "@/types";
 import { SectionHeading } from "@/components/site/section-heading";
 import { Reveal } from "@/components/site/reveal";
@@ -15,29 +14,38 @@ export function ProcessTimeline({ settings }: { settings: PublicSettings }) {
       <div className="container">
         <SectionHeading
           eyebrow="How we work"
-          title={(process.heading as string) || "From concept to deploy"}
+          title={(process.heading as string) || "The Concept to Deploy Process"}
           description={process.description as string}
+          className="mb-8 md:mb-12"
         />
         <div className="relative">
-          <div className="absolute left-0 right-0 top-7 hidden h-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 lg:block" />
-          <div className="grid gap-8 lg:grid-cols-4">
+          {/* Desktop connecting line */}
+          <div
+            aria-hidden
+            className="absolute left-0 right-0 top-6 hidden h-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 lg:block"
+          />
+          <ol className="grid gap-x-6 gap-y-7 md:grid-cols-3 lg:grid-cols-6">
             {steps.map((step, i) => (
-              <Reveal key={step.title} delay={i * 0.1} className="relative">
-                <div className="flex lg:flex-col">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 font-display text-lg font-bold text-white shadow-lg shadow-primary/30"
-                  >
-                    {i + 1}
-                  </motion.div>
-                  <div className="mt-4 lg:mt-6">
-                    <h3 className="font-display text-lg font-semibold">{step.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{step.description}</p>
+              <Reveal key={step.title} delay={Math.min(i * 0.05, 0.25)}>
+                <li className="relative flex gap-4 lg:flex-col lg:items-center lg:gap-0 lg:text-center">
+                  {/* Mobile vertical connector between steps */}
+                  {i < steps.length - 1 && (
+                    <span
+                      aria-hidden
+                      className="absolute left-6 top-12 -bottom-2 w-0.5 bg-gradient-to-b from-violet-600 via-fuchsia-500 to-cyan-400 md:hidden"
+                    />
+                  )}
+                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400 font-display text-sm font-bold text-white shadow-md shadow-primary/25">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div className="min-w-0 pb-1 lg:mt-5 lg:px-1">
+                    <h3 className="font-display text-base font-semibold leading-snug">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.description}</p>
                   </div>
-                </div>
+                </li>
               </Reveal>
             ))}
-          </div>
+          </ol>
         </div>
       </div>
     </section>
