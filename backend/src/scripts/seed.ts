@@ -430,6 +430,9 @@ async function run() {
   for (const p of CORE_PERMISSIONS) {
     await PermissionModel.updateOne({ name: p.name }, { $setOnInsert: p }, { upsert: true });
   }
+  // The catalog is the source of truth — drop any permission docs that are no
+  // longer part of it (e.g. the old coarse content:* / media:manage grants).
+  await PermissionModel.deleteMany({ name: { $nin: CORE_PERMISSIONS.map((p) => p.name) } });
   for (const r of ROLES) {
     // System roles are code-defined: refresh their grants so they stay in sync
     // with the catalog. Custom roles are never touched by the seed.
