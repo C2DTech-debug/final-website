@@ -23,7 +23,14 @@ function setRefreshCookie(res: Response, token: string) {
   });
 }
 
-const publicUser = (u: Record<string, unknown>) => ({
+const roleLabelFallback = (role: string) => ROLE_LABELS[role as keyof typeof ROLE_LABELS] ?? role;
+
+async function resolveRoleLabel(role: string): Promise<string> {
+  const doc = (await RoleModel.findOne({ name: role }).select("label").lean()) as unknown as { label?: string } | null;
+  return doc?.label ?? roleLabelFallback(role);
+}
+
+const publicUser = (u: Record<string, unknown>, roleLabel?: string) => ({
   _id: u._id,
   name: u.name,
   email: u.email,
@@ -34,7 +41,7 @@ const publicUser = (u: Record<string, unknown>) => ({
   twoFactorEnabled: u.twoFactorEnabled,
   lastLoginAt: u.lastLoginAt,
   createdAt: u.createdAt,
-  roleLabel: ROLE_LABELS[u.role as keyof typeof ROLE_LABELS] ?? u.role,
+  roleLabel: roleLabel ?? roleLabelFallback(u.role as string),
 });
 
 export const login = asyncHandler(async (req: Request, res: Response) => {
@@ -69,7 +76,8 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   await logActivity({ user, action: "login", description: "Admin signed in", req });
 
   const permissions = await getEffectivePermissions(user.role);
-  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject(), roleLabel), permissions } } });
 });
 
 export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) => {
@@ -109,7 +117,8 @@ export const verifyTwoFactor = asyncHandler(async (req: Request, res: Response) 
 
   await logActivity({ user, action: "login", description: "Admin signed in (2FA verified)", req });
   const permissions = await getEffectivePermissions(user.role);
-  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject(), roleLabel), permissions } } });
 });
 
 export const refresh = asyncHandler(async (req: Request, res: Response) => {
@@ -143,7 +152,8 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
 
   const accessToken = signAccessToken({ _id: user._id.toString(), email: user.email, role: user.role, name: user.name });
   const permissions = await getEffectivePermissions(user.role);
-  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject()), permissions } } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(200).json({ success: true, data: { accessToken, user: { ...publicUser(user.toObject(), roleLabel), permissions } } });
 });
 
 export const logout = asyncHandler(async (req: Request, res: Response) => {
@@ -166,7 +176,8 @@ export const me = asyncHandler(async (req: Request, res: Response) => {
   const user = await AdminUserModel.findById(req.user!._id);
   if (!user) throw ApiError.notFound("User not found");
   const permissions = await getEffectivePermissions(user.role);
-  res.status(200).json({ success: true, data: { user: { ...publicUser(user.toObject()), permissions } } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(200).json({ success: true, data: { user: { ...publicUser(user.toObject(), roleLabel), permissions } } });
 });
 
 export const changePassword = asyncHandler(async (req: Request, res: Response) => {
@@ -225,7 +236,9 @@ export const disableTwoFactor = asyncHandler(async (req: Request, res: Response)
 
 export const listUsers = asyncHandler(async (req: Request, res: Response) => {
   const users = await AdminUserModel.find().sort({ createdAt: -1 }).lean();
-  res.status(200).json({ success: true, data: users.map(publicUser) });
+  const roleDocs = await RoleModel.find().select("name label").lean();
+  const labelOf = new Map(roleDocs.map((r) => [r.name, r.label]));
+  res.status(200).json({ success: true, data: users.map((u) => publicUser(u, labelOf.get(u.role as string) ?? roleLabelFallback(u.role as string))) });
 });
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
@@ -236,7 +249,8 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
   if (!roleExists) throw ApiError.badRequest(`Unknown role "${body.role}"`);
   const user = await AdminUserModel.create({ ...body, email: body.email.toLowerCase(), createdBy: req.user!._id });
   await logActivity({ user: req.user, action: "create_user", entity: "admin_user", entityId: user._id, description: `Created admin user ${user.name} (${user.role})`, req });
-  res.status(201).json({ success: true, data: { user: publicUser(user.toObject()) } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(201).json({ success: true, data: { user: publicUser(user.toObject(), roleLabel) } });
 });
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
@@ -262,7 +276,8 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   Object.assign(user, body, body.email ? { email: body.email.toLowerCase() } : {});
   await user.save();
   await logActivity({ user: req.user, action: "update_user", entity: "admin_user", entityId: id, description: `Updated admin ${user.name}`, req });
-  res.status(200).json({ success: true, data: { user: publicUser(user.toObject()) } });
+  const roleLabel = await resolveRoleLabel(user.role);
+  res.status(200).json({ success: true, data: { user: publicUser(user.toObject(), roleLabel) } });
 });
 
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
