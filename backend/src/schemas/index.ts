@@ -338,3 +338,17 @@ export const roleSchema = z.object({
   permissions: z.array(z.string().max(120)).optional().default([]),
   system: z.boolean().optional().default(false),
 });
+
+// ---------- Payments ----------
+
+export const createPaymentSchema = z.object({
+  leadId: z.string().regex(/^[a-fA-F0-9]{24}$/),
+  // Amount in rupees (whole or decimal). The backend converts to integer paise.
+  amount: z.number().positive("Amount must be greater than 0").max(1_000_000_000),
+  currency: z.string().length(3).optional().default("INR"),
+  description: z.string().trim().max(1000).optional().default(""),
+  // Admin checkbox confirming the client agreed before a link is generated.
+  clientApproved: z.boolean().optional().default(false),
+  // Bypass the duplicate active-request guard for the same lead.
+  force: z.boolean().optional().default(false),
+});

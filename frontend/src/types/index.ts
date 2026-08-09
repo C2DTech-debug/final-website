@@ -787,3 +787,90 @@ export interface PayrollSummary {
   month: number;
   rows: PayrollRow[];
 }
+
+// ---------- Payments ----------
+export const PAYMENT_STATUSES = ["created", "link_created", "sent", "paid", "failed", "expired", "cancelled"] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+
+export const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  created: "Created",
+  link_created: "Link Created",
+  sent: "Sent",
+  paid: "Paid",
+  failed: "Failed",
+  expired: "Expired",
+  cancelled: "Cancelled",
+};
+
+export const PAYMENT_ACTION_LABELS: Record<string, string> = {
+  created: "Created",
+  link_created: "Link Created",
+  whatsapp_sent: "Sent",
+  whatsapp_delivered: "Delivered",
+  whatsapp_read: "Read",
+  whatsapp_failed: "Send Failed",
+  paid: "Paid",
+  failed: "Failed",
+  expired: "Expired",
+  cancelled: "Cancelled",
+  webhook: "Webhook",
+  note: "Note",
+};
+
+export interface PaymentTimelineEntry {
+  _id: string;
+  action: string;
+  description: string;
+  by: string | null;
+  byName: string;
+  meta?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface Payment {
+  _id: string;
+  paymentRef: string;
+  lead:
+    | { _id: string; leadId: string; name: string; company: string; whatsapp: string; phone: string; email: string }
+    | string
+    | null;
+  leadSnapshot: {
+    leadId: string;
+    name: string;
+    company: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+  };
+  amountPaise: number;
+  currency: string;
+  description: string;
+  clientApproved: boolean;
+  approvedBy?: { _id: string; name: string; email: string } | string | null;
+  approvedAt?: string | null;
+  createdBy?: { _id: string; name: string; email: string } | string | null;
+  status: PaymentStatus;
+  razorpay: { linkId: string; shortUrl: string; entityId: string; orderId: string };
+  whatsapp: { messageId: string; status: string; sentTo: string; error: string };
+  payment: {
+    razorpayPaymentId: string;
+    amountPaidPaise: number;
+    method: string;
+    paidAt: string | null;
+    webhookEvent: string;
+    note: string;
+  };
+  timeline: PaymentTimelineEntry[];
+  source: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PaymentStats {
+  total: number;
+  paid: number;
+  outstanding: number;
+  collectedPaise: number;
+  outstandingPaise: number;
+  byStatus: { _id: string; count: number }[];
+}

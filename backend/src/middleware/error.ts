@@ -48,7 +48,16 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     });
   }
 
-  const errorMeta = err instanceof Error ? (err.stack || `${err.name}: ${err.message}`) : String(err);
+  let errorMeta: string;
+  if (err instanceof Error) {
+    errorMeta = err.stack || `${err.name}: ${err.message}`;
+  } else {
+    try {
+      errorMeta = JSON.stringify(err);
+    } catch {
+      errorMeta = String(err);
+    }
+  }
   logger.error(errorMeta);
   const message = env.isProduction ? "Internal server error" : err instanceof Error ? err.message : String(err);
   res.status(500).json({ success: false, error: { code: "INTERNAL", message } });

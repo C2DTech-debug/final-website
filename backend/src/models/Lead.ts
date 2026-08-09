@@ -72,7 +72,7 @@ const leadSchema = new Schema(
     assignedTo: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null, index: true },
     status: { type: String, enum: LEAD_STATUSES, default: "new", index: true },
     expectedClosingDate: { type: Date, default: null },
-    followUpDate: { type: Date, default: null, index: true },
+    followUpDate: { type: Date, default: null },
     lastContactedAt: { type: Date, default: null },
     tags: [{ type: String, index: true }],
     createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },

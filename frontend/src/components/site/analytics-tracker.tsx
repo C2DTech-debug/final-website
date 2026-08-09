@@ -8,7 +8,7 @@ export function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    void trackVisit(pathname, document.referrer);
+    trackVisit(pathname, document.referrer).catch(() => undefined);
   }, [pathname]);
 
   return null;

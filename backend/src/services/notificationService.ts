@@ -1,7 +1,7 @@
 import { NotificationModel } from "../models/Notification";
 
 export interface NotifyInput {
-  type: "contact" | "lead" | "estimate" | "blog" | "career" | "system" | "login" | "error";
+  type: "contact" | "lead" | "estimate" | "blog" | "career" | "system" | "login" | "error" | "payment";
   title: string;
   message?: string;
   link?: string;

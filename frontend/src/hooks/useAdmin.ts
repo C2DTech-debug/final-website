@@ -18,6 +18,8 @@ import type {
   MediaAsset,
   NewsletterSubscriber,
   Notification,
+  Payment,
+  PaymentStats,
   PayrollSummary,
   Permission,
   ProjectEstimate,
@@ -675,5 +677,80 @@ export function usePayrollSummary(year: number, month: number) {
   return useQuery({
     queryKey: payrollKeys.summary(year, month),
     queryFn: () => api.get<PayrollSummary>(`/api/v1/admin/payroll/summary${qs({ year, month })}`),
+  });
+}
+
+// ---------- Payments ----------
+export const paymentKeys = {
+  list: (p: Record<string, string>) => ["admin", "payments", p] as const,
+  detail: (id: string) => ["admin", "payments", id] as const,
+  stats: ["admin", "payments", "stats"] as const,
+};
+
+export function usePayments(params: Record<string, string> = {}) {
+  return useQuery({
+    queryKey: paymentKeys.list(params),
+    queryFn: () => apiFetchPaginated<Payment>(`/api/v1/admin/payments${qs(params)}`),
+  });
+}
+
+export function usePayment(id: string) {
+  return useQuery({
+    queryKey: paymentKeys.detail(id),
+    queryFn: () => api.get<Payment>(`/api/v1/admin/payments/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function usePaymentStats() {
+  return useQuery({
+    queryKey: paymentKeys.stats,
+    queryFn: () => api.get<PaymentStats>("/api/v1/admin/payments/stats"),
+  });
+}
+
+function invalidatePayments(qc: ReturnType<typeof useQueryClient>, id?: string) {
+  void qc.invalidateQueries({ queryKey: ["admin", "payments"] });
+  if (id) void qc.invalidateQueries({ queryKey: paymentKeys.detail(id) });
+}
+
+export function useCreatePayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { leadId: string; amount: number; description?: string; clientApproved?: boolean; force?: boolean }) =>
+      api.post<Payment>("/api/v1/admin/payments", body),
+    onSuccess: () => invalidatePayments(qc),
+  });
+}
+
+export function useCreatePaymentLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Payment>(`/api/v1/admin/payments/${id}/link`),
+    onSuccess: (_data, id) => invalidatePayments(qc, id),
+  });
+}
+
+export function useSendPaymentLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Payment>(`/api/v1/admin/payments/${id}/send`),
+    onSuccess: (_data, id) => invalidatePayments(qc, id),
+  });
+}
+
+export function useResendPaymentLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Payment>(`/api/v1/admin/payments/${id}/resend`),
+    onSuccess: (_data, id) => invalidatePayments(qc, id),
+  });
+}
+
+export function useCancelPayment() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Payment>(`/api/v1/admin/payments/${id}/cancel`),
+    onSuccess: (_data, id) => invalidatePayments(qc, id),
   });
 }

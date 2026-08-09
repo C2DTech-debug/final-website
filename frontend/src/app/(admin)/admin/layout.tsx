@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 const ROUTE_PERMISSIONS: [RegExp, string][] = [
   [/^\/admin\/leads/, "leads:view"],
   [/^\/admin\/estimates/, "estimates:view"],
+  [/^\/admin\/payments/, "payments:view"],
   [/^\/admin\/analytics/, "analytics:view"],
   [/^\/admin\/newsletter/, "subscribers:view"],
   [/^\/admin\/blogs/, "blogs:view"],

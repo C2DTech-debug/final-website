@@ -22,6 +22,7 @@ import {
   ClipboardList,
   CalendarClock,
   Coins,
+  Wallet,
 } from "lucide-react";
 
 export const SITE_NAME = "C2D Tech";
@@ -104,6 +105,7 @@ export const NOTIFICATION_TYPES: Record<string, string> = {
   contact: "Contact",
   lead: "Lead",
   estimate: "Estimate",
+  payment: "Payment",
   blog: "Blog",
   career: "Career",
   system: "System",
@@ -118,6 +120,20 @@ export const ESTIMATE_STATUSES = [
   { value: "won", label: "Won", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
   { value: "lost", label: "Lost", color: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30" },
 ] as const;
+
+export const PAYMENT_STATUSES = [
+  { value: "created", label: "Created", color: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30" },
+  { value: "link_created", label: "Link Created", color: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30" },
+  { value: "sent", label: "Sent", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  { value: "paid", label: "Paid", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  { value: "failed", label: "Failed", color: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30" },
+  { value: "expired", label: "Expired", color: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30" },
+  { value: "cancelled", label: "Cancelled", color: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30" },
+] as const;
+
+export function paymentStatusColor(status: string): string {
+  return PAYMENT_STATUSES.find((s) => s.value === status)?.color || "bg-muted text-muted-foreground";
+}
 
 export const PORTFOLIO_STATUSES = [
   { value: "draft", label: "Draft" },
@@ -163,6 +179,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { title: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "dashboard:view" },
   { title: "Leads", href: "/admin/leads", icon: Users, badge: "CRM", permission: "leads:view" },
   { title: "Estimates", href: "/admin/estimates", icon: Calculator, permission: "estimates:view" },
+  { title: "Payments", href: "/admin/payments", icon: Wallet, permission: "payments:view" },
   { title: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics:view" },
   { title: "Newsletter", href: "/admin/newsletter", icon: Mail, permission: "subscribers:view" },
   { title: "Blog", href: "/admin/blogs", icon: FileText, section: "Content", permission: "blogs:view" },

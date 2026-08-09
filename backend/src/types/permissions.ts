@@ -124,6 +124,15 @@ export const PERMISSION_CATALOG: PermissionDef[] = [
 
   // ---- Payroll ----
   { name: "payroll:view", label: "View points & payroll", description: "See monthly points, tasks and attendance summary.", module: "payroll", action: "view", group: "Payroll" },
+
+  // ---- Payments ----
+  { name: "payments:view", label: "View payments", description: "See the payment requests list and stats.", module: "payments", action: "view", group: "Payments" },
+  { name: "payments:view_details", label: "View payment details", description: "Open payment details, timeline and Razorpay link.", module: "payments", action: "view_details", group: "Payments" },
+  { name: "payments:create", label: "Create payment requests", description: "Create payment requests against leads.", module: "payments", action: "create", group: "Payments" },
+  { name: "payments:link_create", label: "Generate payment links", description: "Generate Razorpay payment links for approved requests.", module: "payments", action: "link_create", group: "Payments" },
+  { name: "payments:send_whatsapp", label: "Send via WhatsApp", description: "Send the payment link to the client on WhatsApp.", module: "payments", action: "send_whatsapp", group: "Payments" },
+  { name: "payments:resend_whatsapp", label: "Resend via WhatsApp", description: "Resend the payment link to the client on WhatsApp.", module: "payments", action: "resend_whatsapp", group: "Payments" },
+  { name: "payments:cancel", label: "Cancel payment requests", description: "Cancel payment requests before they are paid.", module: "payments", action: "cancel", group: "Payments" },
 ];
 
 export const PERMISSIONS = PERMISSION_CATALOG.map((p) => p.name);

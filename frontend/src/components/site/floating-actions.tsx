@@ -3,10 +3,17 @@
 import * as React from "react";
 import { ArrowUp, MessageCircle } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, buildWhatsAppUrl } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/useSite";
 
 export function FloatingActions() {
   const [visible, setVisible] = React.useState(false);
+  const { data } = useSiteSettings();
+  const settings = data ?? {};
+  const misc = (settings.misc ?? {}) as Record<string, unknown>;
+  const social = (settings.social ?? {}) as Record<string, unknown>;
+  const whatsappNumber = (misc.whatsappNumber as string) || (social.whatsapp as string) || "";
+  const whatsappUrl = buildWhatsAppUrl(whatsappNumber, "Hi C2D Tech! I'd like to discuss a project.");
 
   React.useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > 600);
@@ -33,7 +40,7 @@ export function FloatingActions() {
       </AnimatePresence>
 
       <a
-        href="https://wa.me/"
+        href={whatsappUrl || undefined}
         target="_blank"
         rel="noreferrer"
         className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-xl shadow-emerald-500/30 transition-transform hover:scale-105"

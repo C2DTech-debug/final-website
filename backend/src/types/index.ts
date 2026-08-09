@@ -97,6 +97,12 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     "attendance:view",
     "attendance:view_all",
     "payroll:view",
+    "payments:view",
+    "payments:view_details",
+    "payments:create",
+    "payments:link_create",
+    "payments:send_whatsapp",
+    "payments:resend_whatsapp",
   ],
   marketing_manager: [
     "dashboard:view",

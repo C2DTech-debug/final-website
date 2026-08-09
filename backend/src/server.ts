@@ -9,6 +9,7 @@ import fs from "fs";
 import { env } from "./config/env";
 import { connectDB } from "./config/db";
 import apiRoutes from "./routes";
+import { paymentsWebhookRouter, whatsappWebhookRouter } from "./routes/webhookRoutes";
 import { errorHandler, notFoundHandler } from "./middleware/error";
 import { maintenanceMode } from "./middleware/security";
 import { isCloudinaryConfigured } from "./services/storageService";
@@ -47,6 +48,14 @@ async function bootstrap() {
 
   app.use(compression());
   app.use(cookieParser());
+
+  // Razorpay / WhatsApp webhooks need the untouched raw body for signature
+  // verification, so they are mounted with express.raw BEFORE the JSON body
+  // parser. They are also mounted before maintenanceMode so payment
+  // processing keeps working during maintenance windows.
+  app.use(`${env.API_PREFIX}/payments/webhook`, express.raw({ type: "application/json" }), paymentsWebhookRouter);
+  app.use(`${env.API_PREFIX}/whatsapp/webhook`, express.raw({ type: "application/json" }), whatsappWebhookRouter);
+
   app.use(express.json({ limit: "2mb" }));
   app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 

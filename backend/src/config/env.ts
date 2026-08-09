@@ -27,15 +27,33 @@ function num(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && value !== undefined ? parsed : fallback;
 }
 
+/**
+ * Origins that are always allowed regardless of the CLIENT_URL env var.
+ * CLIENT_URL (comma-separated) may add more; it can never reduce this list.
+ * CORS uses credentials, so `*` must never be used.
+ */
+const DEFAULT_CLIENT_URLS = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://c2dtech.com",
+  "https://www.c2dtech.com",
+  "https://c2dtech-frontend.vercel.app",
+];
+
+function parseClientUrls(): string[] {
+  const fromEnv = (process.env.CLIENT_URL || "")
+    .split(",")
+    .map((u) => u.trim())
+    .filter(Boolean);
+  return Array.from(new Set([...fromEnv, ...DEFAULT_CLIENT_URLS]));
+}
+
 export const env = {
   NODE_ENV: process.env.NODE_ENV || "development",
   isProduction: process.env.NODE_ENV === "production",
   PORT: num(process.env.PORT, 5000),
   MONGODB_URI: process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/c2dtech",
-  CLIENT_URLS: (process.env.CLIENT_URL || "http://localhost:3000")
-    .split(",")
-    .map((u) => u.trim())
-    .filter(Boolean),
+  CLIENT_URLS: parseClientUrls(),
 
   JWT: {
     ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "dev_access_secret",
@@ -70,6 +88,22 @@ export const env = {
 
   RECAPTCHA_SECRET: process.env.RECAPTCHA_SECRET || "",
   WHATSAPP_ADMIN_NUMBER: process.env.WHATSAPP_ADMIN_NUMBER || "",
+
+  RAZORPAY: {
+    KEY_ID: process.env.RAZORPAY_KEY_ID || "",
+    KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || "",
+    WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || "",
+  },
+
+  WHATSAPP: {
+    ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN || "",
+    PHONE_NUMBER_ID: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
+    BUSINESS_ACCOUNT_ID: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID || "",
+    TEMPLATE_NAME: process.env.WHATSAPP_TEMPLATE_NAME || "",
+    WEBHOOK_VERIFY_TOKEN: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN || "",
+    APP_SECRET: process.env.WHATSAPP_APP_SECRET || "",
+    GRAPH_VERSION: process.env.WHATSAPP_GRAPH_VERSION || "v22.0",
+  },
 
   RATE_LIMIT: {
     WINDOW_MS: num(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),

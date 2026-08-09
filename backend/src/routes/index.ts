@@ -12,6 +12,7 @@ import analyticsRoutes, { trackVisit } from "./analyticsRoutes";
 import taskRoutes from "./taskRoutes";
 import attendanceRoutes from "./attendanceRoutes";
 import payrollRoutes from "./payrollRoutes";
+import paymentRoutes from "./paymentRoutes";
 import { standardLimiter, strictLimiter } from "../middleware/rateLimit";
 
 const router = Router();
@@ -43,5 +44,6 @@ router.use("/admin/export", exportRoutes);
 router.use("/admin/tasks", taskRoutes);
 router.use("/admin/attendance", attendanceRoutes);
 router.use("/admin/payroll", payrollRoutes);
+router.use("/admin/payments", paymentRoutes);
 
 export default router;

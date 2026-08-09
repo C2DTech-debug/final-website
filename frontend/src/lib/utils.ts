@@ -22,6 +22,16 @@ export function formatINR(value: number): string {
   }).format(value);
 }
 
+/** Format an amount stored in integer paise (e.g. 500050 → "₹5,000.50"). */
+export function formatRupees(paise: number): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format((paise || 0) / 100);
+}
+
 export function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-IN").format(value);
 }
@@ -102,4 +112,27 @@ export function readFileAsDataURL(file: File): Promise<string> {
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return "Something went wrong";
+}
+
+/**
+ * Normalize a phone number into a wa.me-compatible international digit string.
+ * Strips spaces, `+`, hyphens, brackets, dots. Applies the Indian (91) country
+ * code default for local 10-digit numbers or 11-digit numbers with a leading 0.
+ * Returns "" for empty/invalid input so callers can fall back gracefully.
+ */
+export function normalizeWhatsAppNumber(raw: string | undefined | null): string {
+  const digits = (raw || "").replace(/[^\d]/g, "");
+  if (!digits) return "";
+  if (digits.length === 11 && digits.startsWith("0")) return `91${digits.slice(1)}`;
+  if (digits.length === 10) return `91${digits}`;
+  return digits;
+}
+
+/** Build a `https://wa.me/<countrycode><number>` chat URL with an optional pre-filled message. */
+export function buildWhatsAppUrl(number: string | undefined | null, message?: string): string {
+  const digits = normalizeWhatsAppNumber(number);
+  if (!digits) return "";
+  const base = `https://wa.me/${digits}`;
+  if (message) return `${base}?text=${encodeURIComponent(message)}`;
+  return base;
 }

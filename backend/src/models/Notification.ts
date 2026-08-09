@@ -5,7 +5,7 @@ const notificationSchema = new Schema(
     user: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null, index: true },
     type: {
       type: String,
-      enum: ["contact", "lead", "estimate", "blog", "career", "system", "login", "error"],
+      enum: ["contact", "lead", "estimate", "blog", "career", "system", "login", "error", "payment"],
       default: "system",
       index: true,
     },
