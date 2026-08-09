@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ListTodo, Plus, Search } from "lucide-react";
+import { Link2, ListTodo, Paperclip, Plus, Search } from "lucide-react";
 import {
   useAdminUserOptions,
   useAllTasks,
@@ -360,10 +360,38 @@ export default function AdminTasksPage() {
             </DialogDescription>
           </DialogHeader>
 
-          {verifyAction === "approve" && verifying?.submissionNote && (
-            <div className="rounded-lg border bg-muted/40 p-3 text-sm">
-              <p className="mb-1 font-medium">Assignee note</p>
-              <p className="text-muted-foreground">{verifying.submissionNote}</p>
+          {verifyAction === "approve" && (verifying?.submissionNote || verifying?.submissionUrl || verifying?.submissionFile) && (
+            <div className="space-y-3 rounded-lg border bg-muted/40 p-3 text-sm">
+              {verifying?.submissionNote && (
+                <div>
+                  <p className="mb-1 font-medium">Assignee note</p>
+                  <p className="whitespace-pre-wrap text-muted-foreground">{verifying.submissionNote}</p>
+                </div>
+              )}
+              {(verifying?.submissionUrl || verifying?.submissionFile) && (
+                <div className="flex flex-wrap gap-2">
+                  {verifying?.submissionUrl && (
+                    <a
+                      href={verifying.submissionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-primary hover:underline"
+                    >
+                      <Link2 className="h-4 w-4" /> Submitted link
+                    </a>
+                  )}
+                  {verifying?.submissionFile && (
+                    <a
+                      href={verifying.submissionFile}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-primary hover:underline"
+                    >
+                      <Paperclip className="h-4 w-4" /> Attached file
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
           )}
 

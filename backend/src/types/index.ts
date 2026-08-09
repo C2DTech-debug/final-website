@@ -151,6 +151,7 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     "tasks:submit",
     "attendance:view",
     "payroll:view",
+    "media:upload",
   ],
 };
 

@@ -621,7 +621,7 @@ export function useDeleteTask() {
 export function useSubmitTask() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, body }: { id: string; body: { submissionNote?: string; submissionUrl?: string } }) =>
+    mutationFn: ({ id, body }: { id: string; body: { submissionNote?: string; submissionUrl?: string; submissionFile?: string } }) =>
       api.post<Task>(`/api/v1/admin/tasks/${id}/submit`, body),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "tasks"] }),
   });

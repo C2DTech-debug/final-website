@@ -118,9 +118,10 @@ export const submitTask = asyncHandler(async (req: Request, res: Response) => {
   if (!isAssignee && req.user!.role !== "super_admin") throw ApiError.forbidden("Only the assignee can submit this task");
   if (task.status === "completed") throw ApiError.badRequest("Task already completed");
 
-  const { submissionNote, submissionUrl } = req.body;
+  const { submissionNote, submissionUrl, submissionFile } = req.body;
   task.submissionNote = submissionNote ?? "";
   task.submissionUrl = submissionUrl ?? "";
+  task.submissionFile = submissionFile ?? "";
   task.status = "submitted";
   task.submittedAt = new Date();
   task.rejectedAt = undefined;

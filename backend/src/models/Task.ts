@@ -17,6 +17,7 @@ const taskSchema = new Schema(
     dueDate: { type: Date },
     submissionNote: { type: String, default: "" },
     submissionUrl: { type: String, default: "" },
+    submissionFile: { type: String, default: "" },
     submittedAt: { type: Date },
     verifiedAt: { type: Date },
     verifiedBy: { type: Schema.Types.ObjectId, ref: "AdminUser" },

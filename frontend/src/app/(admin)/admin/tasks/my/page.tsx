@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, ClipboardList, Clock, Send, Star } from "lucide-react";
-import { useMyTaskStats, useMyTasks, useSubmitTask } from "@/hooks/useAdmin";
+import { CheckCircle2, ClipboardList, Clock, FileUp, Paperclip, Send, Star, X } from "lucide-react";
+import { useMyTaskStats, useMyTasks, useSubmitTask, useUploadMedia } from "@/hooks/useAdmin";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatCard } from "@/components/admin/stat-card";
 import { Button } from "@/components/ui/button";
@@ -50,13 +50,35 @@ export default function MyTasksPage() {
   const submit = useSubmitTask();
 
   const [submitting, setSubmitting] = React.useState<Task | null>(null);
-  const [form, setForm] = React.useState({ submissionNote: "", submissionUrl: "" });
+  const [form, setForm] = React.useState({ submissionNote: "", submissionUrl: "", submissionFile: "" });
+  const upload = useUploadMedia();
+  const fileRef = React.useRef<HTMLInputElement>(null);
 
   const tasks = data ?? [];
 
+  const fileNameOf = (url: string) => {
+    const name = url.split("/").pop() || url;
+    try {
+      return decodeURIComponent(name);
+    } catch {
+      return name;
+    }
+  };
+
   const openSubmit = (task: Task) => {
     setSubmitting(task);
-    setForm({ submissionNote: task.submissionNote || "", submissionUrl: task.submissionUrl || "" });
+    setForm({ submissionNote: task.submissionNote || "", submissionUrl: task.submissionUrl || "", submissionFile: task.submissionFile || "" });
+  };
+
+  const handleFile = async (file?: File | null) => {
+    if (!file) return;
+    try {
+      const asset = await upload.mutateAsync(file);
+      setForm((f) => ({ ...f, submissionFile: asset.url }));
+      toast.success("File uploaded");
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    }
   };
 
   const handleSubmit = async () => {
@@ -66,7 +88,10 @@ export default function MyTasksPage() {
       return;
     }
     try {
-      await submit.mutateAsync({ id: submitting._id, body: { submissionNote: form.submissionNote.trim(), submissionUrl: form.submissionUrl.trim() } });
+      await submit.mutateAsync({
+        id: submitting._id,
+        body: { submissionNote: form.submissionNote.trim(), submissionUrl: form.submissionUrl.trim(), submissionFile: form.submissionFile.trim() },
+      });
       toast.success("Task submitted for review");
       setSubmitting(null);
     } catch (err) {
@@ -183,6 +208,26 @@ export default function MyTasksPage() {
                 onChange={(e) => setForm({ ...form, submissionUrl: e.target.value })}
                 placeholder="https://github.com/…, https://preview.…"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>File (optional)</Label>
+              {form.submissionFile ? (
+                <div className="flex items-center justify-between gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm">
+                  <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+                    <Paperclip className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{fileNameOf(form.submissionFile)}</span>
+                  </span>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setForm((f) => ({ ...f, submissionFile: "" }))}>
+                    <X className="h-4 w-4" /> Remove
+                  </Button>
+                </div>
+              ) : (
+                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={upload.isPending}>
+                  {upload.isPending ? <Spinner /> : <FileUp className="h-4 w-4" />} Upload file
+                </Button>
+              )}
+              <input ref={fileRef} type="file" className="hidden" onChange={(e) => handleFile(e.target.files?.[0])} />
+              <p className="text-xs text-muted-foreground">Images, PDFs or videos up to 25 MB.</p>
             </div>
           </div>
 

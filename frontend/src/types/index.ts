@@ -729,6 +729,7 @@ export interface Task {
   dueDate?: string | null;
   submissionNote?: string;
   submissionUrl?: string;
+  submissionFile?: string;
   submittedAt?: string | null;
   verifiedAt?: string | null;
   verifiedBy?: string | null;
