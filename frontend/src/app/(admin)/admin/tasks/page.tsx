@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Link2, ListTodo, Paperclip, Plus, Search } from "lucide-react";
+import { Eye, Link2, ListTodo, Paperclip, Plus, Search } from "lucide-react";
 import {
   useAdminUserOptions,
   useAllTasks,
@@ -107,6 +107,14 @@ export default function AdminTasksPage() {
     setVerifyAction(action);
     setRejectReason("");
   };
+
+  const openView = (task: Task) => {
+    setVerifying(task);
+    setVerifyAction(null);
+    setRejectReason("");
+  };
+
+  const hasSubmission = (task: Task) => Boolean(task.submissionNote || task.submissionUrl || task.submissionFile);
 
   const handleSave = async () => {
     if (!form.title.trim() || !form.assignedTo) {
@@ -252,6 +260,11 @@ export default function AdminTasksPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
+                      {hasSubmission(task) && (
+                        <Button variant="outline" size="sm" onClick={() => openView(task)} aria-label="View submission">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      )}
                       {task.status === "submitted" && (
                         <Button variant="default" size="sm" onClick={() => openVerify(task, "approve")} disabled={verify.isPending}>
                           Verify
@@ -351,16 +364,18 @@ export default function AdminTasksPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {verifyAction === "approve" ? "Verify task" : "Reject submission"}
+              {verifyAction === "approve" ? "Verify task" : verifyAction === "reject" ? "Reject submission" : "Submission details"}
             </DialogTitle>
             <DialogDescription>
               {verifyAction === "approve"
                 ? `Approve "${verifying?.title}" and award ${verifying?.points ?? 0} points.`
-                : `Reject "${verifying?.title}" so the assignee can rework it.`}
+                : verifyAction === "reject"
+                  ? `Reject "${verifying?.title}" so the assignee can rework it.`
+                  : `Submitted work for "${verifying?.title}".`}
             </DialogDescription>
           </DialogHeader>
 
-          {verifyAction === "approve" && (verifying?.submissionNote || verifying?.submissionUrl || verifying?.submissionFile) && (
+          {(verifying?.submissionNote || verifying?.submissionUrl || verifying?.submissionFile) && (
             <div className="space-y-3 rounded-lg border bg-muted/40 p-3 text-sm">
               {verifying?.submissionNote && (
                 <div>
@@ -395,6 +410,17 @@ export default function AdminTasksPage() {
             </div>
           )}
 
+          {verifyAction === null && (
+            <div className="space-y-1 rounded-lg border p-3 text-xs text-muted-foreground">
+              {verifying?.submittedAt && <p>Submitted {formatDate(verifying.submittedAt)}</p>}
+              {verifying?.status === "completed" && verifying?.verifiedAt && <p>Verified {formatDate(verifying.verifiedAt)}</p>}
+              {verifying?.status === "rejected" && verifying?.rejectedAt && <p>Rejected {formatDate(verifying.rejectedAt)}</p>}
+              {verifying?.status === "rejected" && verifying?.rejectionReason && (
+                <p className="text-rose-600 dark:text-rose-400">Reason: {verifying.rejectionReason}</p>
+              )}
+            </div>
+          )}
+
           {verifyAction === "reject" && (
             <div className="space-y-2">
               <Label>Rejection reason</Label>
@@ -403,18 +429,26 @@ export default function AdminTasksPage() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setVerifying(null)} disabled={verify.isPending}>
-              Cancel
-            </Button>
-            {verifyAction === "reject" && (
-              <Button variant="destructive" onClick={handleVerify} disabled={verify.isPending}>
-                {verify.isPending ? <Spinner /> : "Reject"}
+            {verifyAction === null ? (
+              <Button variant="outline" onClick={() => setVerifying(null)}>
+                Close
               </Button>
-            )}
-            {verifyAction === "approve" && (
-              <Button onClick={handleVerify} disabled={verify.isPending}>
-                {verify.isPending ? <Spinner /> : "Approve"}
-              </Button>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => setVerifying(null)} disabled={verify.isPending}>
+                  Cancel
+                </Button>
+                {verifyAction === "reject" && (
+                  <Button variant="destructive" onClick={handleVerify} disabled={verify.isPending}>
+                    {verify.isPending ? <Spinner /> : "Reject"}
+                  </Button>
+                )}
+                {verifyAction === "approve" && (
+                  <Button onClick={handleVerify} disabled={verify.isPending}>
+                    {verify.isPending ? <Spinner /> : "Approve"}
+                  </Button>
+                )}
+              </>
             )}
           </DialogFooter>
         </DialogContent>

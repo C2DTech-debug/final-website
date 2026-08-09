@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ExternalLink, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ExternalLink, Eye, MoreHorizontal, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import {
   useApplications,
   useCreateJob,
@@ -276,6 +276,22 @@ function ListEditor({ label, items, onChange }: { label: string; items: string[]
   );
 }
 
+function DetailField({ label, value, href }: { label: string; value?: string; href?: string }) {
+  if (!value) return null;
+  return (
+    <div className="space-y-0.5">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          {value}
+        </a>
+      ) : (
+        <p className="whitespace-pre-wrap text-sm">{value}</p>
+      )}
+    </div>
+  );
+}
+
 // ---------- Applications tab ----------
 
 function ApplicationsTab() {
@@ -286,6 +302,7 @@ function ApplicationsTab() {
   const updateApp = useUpdateApplication();
   const delApp = useDeleteApplication();
   const [deleting, setDeleting] = React.useState<JobApplication | null>(null);
+  const [viewing, setViewing] = React.useState<JobApplication | null>(null);
 
   const rows = data?.data ?? [];
   const meta = data?.meta;
@@ -388,6 +405,9 @@ function ApplicationsTab() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setViewing(app)}>
+                            <Eye className="mr-2 h-4 w-4" /> View
+                          </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setDeleting(app)}>
                             <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
@@ -411,6 +431,35 @@ function ApplicationsTab() {
           </div>
         </div>
       )}
+
+      <Dialog open={Boolean(viewing)} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>{viewing?.name}</DialogTitle>
+            <DialogDescription>
+              {viewing
+                ? `${typeof viewing.job === "object" && viewing.job ? viewing.job.title : "General application"} · Applied ${formatDate(viewing.createdAt)}`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <DetailField label="Email" value={viewing?.email} />
+              <DetailField label="Phone" value={viewing?.phone} />
+              <DetailField label="Expected salary" value={viewing?.expectedSalary} />
+              <DetailField label="Status" value={viewing ? APPLICATION_STATUS_LABELS[viewing.status] : undefined} />
+              <DetailField label="LinkedIn" value={viewing?.linkedin} href={viewing?.linkedin} />
+              <DetailField label="Portfolio" value={viewing?.portfolio} href={viewing?.portfolio} />
+            </div>
+            <DetailField label="Cover letter" value={viewing?.coverLetter} />
+            <DetailField label="Resume" value={viewing?.resumeName || "Download resume"} href={viewing?.resumeUrl} />
+            <DetailField label="Notes" value={viewing?.notes} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={Boolean(deleting)}

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { CheckCircle2, ClipboardList, Clock, FileUp, Paperclip, Send, Star, X } from "lucide-react";
+import { CheckCircle2, ClipboardList, Clock, Eye, FileUp, Link2, Paperclip, Send, Star, X } from "lucide-react";
 import { useMyTaskStats, useMyTasks, useSubmitTask, useUploadMedia } from "@/hooks/useAdmin";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatCard } from "@/components/admin/stat-card";
@@ -50,6 +50,7 @@ export default function MyTasksPage() {
   const submit = useSubmitTask();
 
   const [submitting, setSubmitting] = React.useState<Task | null>(null);
+  const [viewing, setViewing] = React.useState<Task | null>(null);
   const [form, setForm] = React.useState({ submissionNote: "", submissionUrl: "", submissionFile: "" });
   const upload = useUploadMedia();
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -100,6 +101,7 @@ export default function MyTasksPage() {
   };
 
   const canSubmit = (task: Task) => ["pending", "in_progress", "rejected"].includes(task.status);
+  const hasSubmission = (task: Task) => Boolean(task.submissionNote || task.submissionUrl || task.submissionFile);
 
   return (
     <div className="space-y-4">
@@ -143,7 +145,7 @@ export default function MyTasksPage() {
                 <TableHead>Points</TableHead>
                 <TableHead>Due</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-28" />
+                <TableHead className="w-44" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,17 +165,38 @@ export default function MyTasksPage() {
                   </TableCell>
                   <TableCell>
                     {canSubmit(task) ? (
-                      <Button variant="outline" size="sm" onClick={() => openSubmit(task)} disabled={submit.isPending}>
-                        {task.status === "rejected" ? "Resubmit" : "Submit"}
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => openSubmit(task)} disabled={submit.isPending}>
+                          {task.status === "rejected" ? "Resubmit" : "Submit"}
+                        </Button>
+                        {hasSubmission(task) && (
+                          <Button variant="ghost" size="sm" onClick={() => setViewing(task)} aria-label="View submission">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     ) : task.status === "submitted" ? (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        {task.submittedAt ? timeAgo(task.submittedAt) : ""}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {task.submittedAt ? timeAgo(task.submittedAt) : ""}
+                        </span>
+                        {hasSubmission(task) && (
+                          <Button variant="ghost" size="sm" onClick={() => setViewing(task)} aria-label="View submission">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     ) : (
-                      <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Done
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Done
+                        </span>
+                        {hasSubmission(task) && (
+                          <Button variant="ghost" size="sm" onClick={() => setViewing(task)} aria-label="View submission">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -237,6 +260,62 @@ export default function MyTasksPage() {
             </Button>
             <Button onClick={handleSubmit} disabled={submit.isPending}>
               {submit.isPending ? <Spinner /> : <Send className="mr-1 h-4 w-4" />} Submit for review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(viewing)} onOpenChange={(o) => !o && setViewing(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Submission details</DialogTitle>
+            <DialogDescription>{viewing?.title}</DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2 text-sm">
+            {viewing?.submissionNote && (
+              <div>
+                <p className="mb-1 font-medium">Submission note</p>
+                <p className="whitespace-pre-wrap rounded-lg border bg-muted/40 p-3 text-muted-foreground">{viewing.submissionNote}</p>
+              </div>
+            )}
+            {(viewing?.submissionUrl || viewing?.submissionFile) && (
+              <div className="flex flex-wrap gap-2">
+                {viewing?.submissionUrl && (
+                  <a
+                    href={viewing.submissionUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-primary hover:underline"
+                  >
+                    <Link2 className="h-4 w-4" /> Submitted link
+                  </a>
+                )}
+                {viewing?.submissionFile && (
+                  <a
+                    href={viewing.submissionFile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border bg-background px-3 py-1.5 text-primary hover:underline"
+                  >
+                    <Paperclip className="h-4 w-4" /> Attached file
+                  </a>
+                )}
+              </div>
+            )}
+            <div className="space-y-1 rounded-lg border p-3 text-xs text-muted-foreground">
+              {viewing?.submittedAt && <p>Submitted {formatDate(viewing.submittedAt)}</p>}
+              {viewing?.status === "completed" && viewing?.verifiedAt && <p>Verified {formatDate(viewing.verifiedAt)}</p>}
+              {viewing?.status === "rejected" && viewing?.rejectedAt && <p>Rejected {formatDate(viewing.rejectedAt)}</p>}
+              {viewing?.status === "rejected" && viewing?.rejectionReason && (
+                <p className="text-rose-600 dark:text-rose-400">Reason: {viewing.rejectionReason}</p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewing(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
