@@ -3,6 +3,7 @@ import { authenticator } from "otplib";
 import QRCode from "qrcode";
 import { AdminUserModel } from "../models/AdminUser";
 import { RefreshTokenModel } from "../models/RefreshToken";
+import { RoleModel } from "../models/Role";
 import { env } from "../config/env";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -231,6 +232,8 @@ export const createUser = asyncHandler(async (req: Request, res: Response) => {
   const body = req.body as { name: string; email: string; password: string; role: string; phone?: string; isActive?: boolean };
   const existing = await AdminUserModel.findOne({ email: body.email.toLowerCase() });
   if (existing) throw ApiError.conflict("An admin with this email already exists");
+  const roleExists = await RoleModel.exists({ name: body.role });
+  if (!roleExists) throw ApiError.badRequest(`Unknown role "${body.role}"`);
   const user = await AdminUserModel.create({ ...body, email: body.email.toLowerCase(), createdBy: req.user!._id });
   await logActivity({ user: req.user, action: "create_user", entity: "admin_user", entityId: user._id, description: `Created admin user ${user.name} (${user.role})`, req });
   res.status(201).json({ success: true, data: { user: publicUser(user.toObject()) } });
@@ -250,6 +253,10 @@ export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   if (body.email && body.email.toLowerCase() !== user.email) {
     const exists = await AdminUserModel.findOne({ email: body.email.toLowerCase(), _id: { $ne: id } });
     if (exists) throw ApiError.conflict("Another admin uses this email");
+  }
+  if (body.role && body.role !== target.role) {
+    const roleExists = await RoleModel.exists({ name: body.role });
+    if (!roleExists) throw ApiError.badRequest(`Unknown role "${body.role}"`);
   }
 
   Object.assign(user, body, body.email ? { email: body.email.toLowerCase() } : {});

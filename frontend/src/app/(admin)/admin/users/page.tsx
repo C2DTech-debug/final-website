@@ -7,6 +7,7 @@ import {
   useCreateUser,
   useDeleteUser,
   useUpdateUser,
+  useRoles,
 } from "@/hooks/useAdmin";
 import { PageHeader } from "@/components/admin/page-header";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
@@ -35,17 +36,22 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
-import { ROLE_LABELS, ROLES, type AdminUser, type Role } from "@/types";
+import { ROLE_LABELS, type AdminUser, type Role, type RoleDoc } from "@/types";
 import { formatDate, initials } from "@/lib/utils";
 import { toast } from "sonner";
 
-const EMPTY_FORM = { name: "", email: "", password: "", role: "content_editor" as Role, phone: "", isActive: true };
+const EMPTY_FORM = { name: "", email: "", password: "", role: "content_editor", phone: "", isActive: true };
 
 export default function AdminUsersPage() {
   const { data, isLoading } = useAdminUsers();
+  const { data: roles } = useRoles();
   const create = useCreateUser();
   const update = useUpdateUser();
   const del = useDeleteUser();
+
+  const roleOptions = roles ?? [];
+  const roleLabelOf = (role: string) =>
+    roleOptions.find((r) => r.name === role)?.label ?? ROLE_LABELS[role as Role] ?? role;
 
   const [open, setOpen] = React.useState(false);
   const [editing, setEditing] = React.useState<AdminUser | null>(null);
@@ -144,7 +150,7 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">{user.roleLabel || ROLE_LABELS[user.role]}</TableCell>
+                  <TableCell className="text-sm">{roleLabelOf(user.role)}</TableCell>
                   <TableCell>
                     {user.twoFactorEnabled ? (
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -203,14 +209,14 @@ export default function AdminUsersPage() {
             </div>
             <div className="space-y-2">
               <Label>Role</Label>
-              <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as Role })}>
+              <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLES.map((r) => (
-                    <SelectItem key={r} value={r}>
-                      {ROLE_LABELS[r]}
+                  {roleOptions.map((r: RoleDoc) => (
+                    <SelectItem key={r.name} value={r.name}>
+                      {r.label}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -1,13 +1,12 @@
 import { Schema, model, models, InferSchemaType } from "mongoose";
 import bcrypt from "bcryptjs";
-import { ROLES, Role } from "../types";
 
 const adminUserSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, index: true },
     password: { type: String, required: true, minlength: 8, select: false },
-    role: { type: String, enum: ROLES, default: "content_editor", index: true },
+    role: { type: String, required: true, default: "content_editor", index: true },
     isActive: { type: Boolean, default: true },
     avatar: { type: String, default: "" },
     phone: { type: String, default: "" },
@@ -35,7 +34,7 @@ adminUserSchema.methods.comparePassword = function (candidate: string): Promise<
 
 export type AdminUser = InferSchemaType<typeof adminUserSchema> & {
   comparePassword(candidate: string): Promise<boolean>;
-  role: Role;
+  role: string;
 };
 
 export const AdminUserModel = models.AdminUser || model("AdminUser", adminUserSchema);

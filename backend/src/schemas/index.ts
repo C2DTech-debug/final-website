@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { ROLES } from "../types";
 
 export const emailSchema = z.string().email().max(200).transform((v) => v.toLowerCase());
 
@@ -57,7 +56,7 @@ export const createAdminUserSchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: emailSchema,
   password: z.string().min(8).max(200),
-  role: z.enum(ROLES),
+  role: z.string().trim().min(1).max(60),
   phone: z.string().max(30).optional().default(""),
   isActive: z.boolean().optional().default(true),
 });
