@@ -12,56 +12,23 @@ import { BlogModel } from "../models/Blog";
 import { JobModel } from "../models/Job";
 import { RoleModel } from "../models/Role";
 import { PermissionModel } from "../models/Permission";
+import { PERMISSION_CATALOG } from "../types";
 
 /**
  * Seeds the full C2D Tech database with production-quality demo content.
- * Idempotent: existing documents are left untouched.
+ * Idempotent: existing documents are left untouched (except system-role
+ * permissions, which are refreshed to the canonical catalog on each run).
  * Usage: npm run seed
  */
 
-const CORE_PERMISSIONS = [
-  { name: "dashboard:view", label: "View dashboard", module: "dashboard", action: "view", group: "Dashboard" },
-  { name: "audit:view", label: "View activity logs", module: "audit", action: "view", group: "System" },
-  { name: "system:configure", label: "System configuration", module: "system", action: "configure", group: "System" },
-  { name: "leads:view", label: "View leads", module: "leads", action: "view", group: "CRM" },
-  { name: "leads:create", label: "Create leads", module: "leads", action: "create", group: "CRM" },
-  { name: "leads:update", label: "Update leads", module: "leads", action: "update", group: "CRM" },
-  { name: "leads:delete", label: "Delete leads", module: "leads", action: "delete", group: "CRM" },
-  { name: "leads:assign", label: "Assign / transfer leads", module: "leads", action: "assign", group: "CRM" },
-  { name: "leads:export", label: "Export leads", module: "leads", action: "export", group: "CRM" },
-  { name: "contacts:view", label: "View enquiries", module: "contacts", action: "view", group: "CRM" },
-  { name: "contacts:update", label: "Update enquiries", module: "contacts", action: "update", group: "CRM" },
-  { name: "contacts:reply", label: "Reply to enquiries", module: "contacts", action: "reply", group: "CRM" },
-  { name: "contacts:delete", label: "Delete enquiries", module: "contacts", action: "delete", group: "CRM" },
-  { name: "content:view", label: "View content", module: "content", action: "view", group: "Content" },
-  { name: "content:create", label: "Create content", module: "content", action: "create", group: "Content" },
-  { name: "content:update", label: "Edit content", module: "content", action: "update", group: "Content" },
-  { name: "content:delete", label: "Delete content", module: "content", action: "delete", group: "Content" },
-  { name: "blogs:publish", label: "Publish blogs", module: "blogs", action: "publish", group: "Content" },
-  { name: "media:manage", label: "Manage media library", module: "media", action: "manage", group: "Tools" },
-  { name: "seo:manage", label: "Manage SEO settings", module: "seo", action: "manage", group: "Tools" },
-  { name: "settings:manage", label: "Manage website settings", module: "settings", action: "manage", group: "Tools" },
-  { name: "analytics:view", label: "View analytics", module: "analytics", action: "view", group: "Tools" },
-  { name: "users:manage", label: "Manage admin users", module: "users", action: "manage", group: "System" },
-  { name: "roles:manage", label: "Manage roles & permissions", module: "roles", action: "manage", group: "System" },
-  { name: "tasks:view", label: "View assigned tasks", module: "tasks", action: "view", group: "Tasks" },
-  { name: "tasks:view_all", label: "View all team tasks", module: "tasks", action: "view_all", group: "Tasks" },
-  { name: "tasks:create", label: "Create tasks", module: "tasks", action: "create", group: "Tasks" },
-  { name: "tasks:update", label: "Update tasks", module: "tasks", action: "update", group: "Tasks" },
-  { name: "tasks:delete", label: "Delete tasks", module: "tasks", action: "delete", group: "Tasks" },
-  { name: "tasks:submit", label: "Submit tasks", module: "tasks", action: "submit", group: "Tasks" },
-  { name: "tasks:verify", label: "Verify tasks & award points", module: "tasks", action: "verify", group: "Tasks" },
-  { name: "attendance:view", label: "View my attendance", module: "attendance", action: "view", group: "Attendance" },
-  { name: "attendance:view_all", label: "View team attendance", module: "attendance", action: "view_all", group: "Attendance" },
-  { name: "payroll:view", label: "View points & payroll summary", module: "payroll", action: "view", group: "Payroll" },
-];
+const CORE_PERMISSIONS = PERMISSION_CATALOG;
 
 const ROLES = [
   { name: "super_admin", label: "Super Admin", description: "Full access to every module including users, roles and system configuration.", level: 5, system: true, permissions: CORE_PERMISSIONS.map((p) => p.name) },
   { name: "admin", label: "Admin", description: "Manage content, leads, CRM, media, settings, tasks and payroll.", level: 4, system: true, permissions: CORE_PERMISSIONS.map((p) => p.name) },
-  { name: "project_manager", label: "Project Manager", description: "Owns the lead pipeline, contacts, estimates, portfolio content, tasks and verification.", level: 3, system: true, permissions: ["dashboard:view", "leads:view", "leads:create", "leads:update", "leads:delete", "leads:assign", "leads:export", "contacts:view", "contacts:reply", "contacts:update", "contacts:delete", "content:view", "content:create", "content:update", "content:delete", "media:manage", "analytics:view", "tasks:view", "tasks:view_all", "tasks:create", "tasks:update", "tasks:delete", "tasks:verify", "attendance:view", "attendance:view_all", "payroll:view"] },
-  { name: "marketing_manager", label: "Marketing Manager", description: "Manages blogs, testimonials, FAQs, newsletter and marketing content.", level: 2, system: true, permissions: ["dashboard:view", "leads:view", "leads:update", "contacts:view", "contacts:reply", "content:view", "content:create", "content:update", "blogs:publish", "media:manage", "seo:manage", "analytics:view"] },
-  { name: "content_editor", label: "Content Editor", description: "Creates and edits content without publishing or managing users.", level: 1, system: true, permissions: ["dashboard:view", "leads:view", "content:view", "content:create", "content:update", "blogs:publish", "analytics:view"] },
+  { name: "project_manager", label: "Project Manager", description: "Owns the lead pipeline, contacts, estimates, portfolio content, tasks and verification.", level: 3, system: true, permissions: ["dashboard:view", "analytics:view", "leads:view", "leads:create", "leads:update", "leads:delete", "leads:assign", "leads:export", "contacts:view", "contacts:update", "contacts:reply", "contacts:delete", "estimates:view", "estimates:update", "estimates:delete", "services:view", "services:create", "services:update", "services:delete", "portfolio:view", "portfolio:create", "portfolio:update", "portfolio:delete", "team:view", "team:create", "team:update", "team:delete", "testimonials:view", "testimonials:create", "testimonials:update", "testimonials:delete", "faqs:view", "faqs:create", "faqs:update", "faqs:delete", "blogs:view", "blogs:create", "blogs:update", "blogs:delete", "blogs:publish", "careers:view", "careers:create", "careers:update", "careers:delete", "applications:view", "applications:update", "applications:delete", "subscribers:view", "media:view", "media:upload", "media:delete", "tasks:view", "tasks:view_all", "tasks:create", "tasks:update", "tasks:delete", "tasks:verify", "attendance:view", "attendance:view_all", "payroll:view"] },
+  { name: "marketing_manager", label: "Marketing Manager", description: "Manages blogs, testimonials, FAQs, newsletter and marketing content.", level: 2, system: true, permissions: ["dashboard:view", "analytics:view", "leads:view", "leads:update", "contacts:view", "contacts:reply", "services:view", "portfolio:view", "testimonials:view", "testimonials:create", "testimonials:update", "faqs:view", "faqs:create", "faqs:update", "blogs:view", "blogs:create", "blogs:update", "blogs:publish", "subscribers:view", "media:view", "media:upload", "seo:manage"] },
+  { name: "content_editor", label: "Content Editor", description: "Creates and edits content without publishing or managing users.", level: 1, system: true, permissions: ["dashboard:view", "analytics:view", "leads:view", "services:view", "services:create", "services:update", "portfolio:view", "portfolio:create", "portfolio:update", "team:view", "team:create", "team:update", "testimonials:view", "testimonials:create", "testimonials:update", "faqs:view", "faqs:create", "faqs:update", "blogs:view", "blogs:create", "blogs:update", "subscribers:view"] },
   { name: "developer", label: "Developer", description: "Tracks assigned tasks, submits work, and views attendance and points.", level: 0, system: true, permissions: ["tasks:view", "tasks:submit", "attendance:view", "payroll:view"] },
 ];
 
@@ -464,7 +431,10 @@ async function run() {
     await PermissionModel.updateOne({ name: p.name }, { $setOnInsert: p }, { upsert: true });
   }
   for (const r of ROLES) {
-    await RoleModel.updateOne({ name: r.name }, { $setOnInsert: r }, { upsert: true });
+    // System roles are code-defined: refresh their grants so they stay in sync
+    // with the catalog. Custom roles are never touched by the seed.
+    const update = r.system ? { $set: r } : { $setOnInsert: r };
+    await RoleModel.updateOne({ name: r.name }, update, { upsert: true });
   }
 
   await seedAdmin();

@@ -8,10 +8,10 @@ const router = Router();
 
 const EXPORT_PERMISSIONS: Record<string, PermissionName[]> = {
   contacts: ["contacts:view"],
-  subscribers: ["content:view"],
-  estimates: ["leads:view"],
+  subscribers: ["subscribers:view"],
+  estimates: ["estimates:view"],
   leads: ["leads:export", "leads:view"],
-  applications: ["content:view"],
+  applications: ["applications:view"],
 };
 
 function requireExportPermission(req: Request, _res: Response, next: NextFunction) {

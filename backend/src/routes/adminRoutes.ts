@@ -55,6 +55,15 @@ const entitySchemas: Record<string, ZodTypeAny> = {
   faq: faqSchema,
 };
 
+/** Maps the route entity to its granular permission module prefix. */
+const ENTITY_PERM: Record<string, { view: string; create: string; update: string; delete: string }> = {
+  service: { view: "services:view", create: "services:create", update: "services:update", delete: "services:delete" },
+  portfolio: { view: "portfolio:view", create: "portfolio:create", update: "portfolio:update", delete: "portfolio:delete" },
+  team: { view: "team:view", create: "team:create", update: "team:update", delete: "team:delete" },
+  testimonial: { view: "testimonials:view", create: "testimonials:create", update: "testimonials:update", delete: "testimonials:delete" },
+  faq: { view: "faqs:view", create: "faqs:create", update: "faqs:update", delete: "faqs:delete" },
+};
+
 function withEntity(entity: string) {
   return (req: Request, _res: Response, next: NextFunction) => {
     req.params.entity = entity;
@@ -63,32 +72,33 @@ function withEntity(entity: string) {
 }
 
 for (const entity of entities) {
-  router.get(`/${entity}`, withEntity(entity), authenticate, requirePermission("content:view"), listEntity);
-  router.get(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission("content:view"), getEntity);
-  router.post(`/${entity}`, withEntity(entity), authenticate, requirePermission("content:create"), validate(entitySchemas[entity]), createEntity);
-  router.put(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission("content:update"), validate(entitySchemas[entity]), updateEntity);
-  router.delete(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission("content:delete"), deleteEntity);
+  const p = ENTITY_PERM[entity];
+  router.get(`/${entity}`, withEntity(entity), authenticate, requirePermission(p.view), listEntity);
+  router.get(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission(p.view), getEntity);
+  router.post(`/${entity}`, withEntity(entity), authenticate, requirePermission(p.create), validate(entitySchemas[entity]), createEntity);
+  router.put(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission(p.update), validate(entitySchemas[entity]), updateEntity);
+  router.delete(`/${entity}/:id`, withEntity(entity), authenticate, requirePermission(p.delete), deleteEntity);
 }
 
 // ---- blogs ----
-router.get("/blogs", authenticate, requirePermission("content:view"), listAllBlogs);
-router.get("/blogs/:id", authenticate, requirePermission("content:view"), getBlogById);
-router.post("/blogs", authenticate, requirePermission("content:create"), validate(blogSchema), createBlog);
-router.put("/blogs/:id", authenticate, requirePermission("content:update"), validate(blogSchema), updateBlog);
-router.delete("/blogs/:id", authenticate, requirePermission("content:delete"), deleteBlog);
+router.get("/blogs", authenticate, requirePermission("blogs:view"), listAllBlogs);
+router.get("/blogs/:id", authenticate, requirePermission("blogs:view"), getBlogById);
+router.post("/blogs", authenticate, requirePermission("blogs:create"), validate(blogSchema), createBlog);
+router.put("/blogs/:id", authenticate, requirePermission("blogs:update"), validate(blogSchema), updateBlog);
+router.delete("/blogs/:id", authenticate, requirePermission("blogs:delete"), deleteBlog);
 
 // ---- careers: jobs ----
-router.get("/careers", authenticate, requirePermission("content:view"), listAllJobs);
-router.get("/careers/jobs/:id", authenticate, requirePermission("content:view"), getJobById);
-router.post("/careers/jobs", authenticate, requirePermission("content:create"), validate(jobSchema), createJob);
-router.put("/careers/jobs/:id", authenticate, requirePermission("content:update"), validate(jobSchema), updateJob);
-router.delete("/careers/jobs/:id", authenticate, requirePermission("content:delete"), deleteJob);
+router.get("/careers", authenticate, requirePermission("careers:view"), listAllJobs);
+router.get("/careers/jobs/:id", authenticate, requirePermission("careers:view"), getJobById);
+router.post("/careers/jobs", authenticate, requirePermission("careers:create"), validate(jobSchema), createJob);
+router.put("/careers/jobs/:id", authenticate, requirePermission("careers:update"), validate(jobSchema), updateJob);
+router.delete("/careers/jobs/:id", authenticate, requirePermission("careers:delete"), deleteJob);
 
 // ---- careers: applications ----
-router.get("/careers/applications", authenticate, requirePermission("content:view"), listApplications);
-router.get("/careers/applications/:id", authenticate, requirePermission("content:view"), getApplication);
-router.patch("/careers/applications/:id", authenticate, requirePermission("content:update"), validate(jobApplicationStatusSchema), updateApplication);
-router.delete("/careers/applications/:id", authenticate, requirePermission("content:delete"), deleteApplication);
+router.get("/careers/applications", authenticate, requirePermission("applications:view"), listApplications);
+router.get("/careers/applications/:id", authenticate, requirePermission("applications:view"), getApplication);
+router.patch("/careers/applications/:id", authenticate, requirePermission("applications:update"), validate(jobApplicationStatusSchema), updateApplication);
+router.delete("/careers/applications/:id", authenticate, requirePermission("applications:delete"), deleteApplication);
 
 // ---- leads (CRM) ----
 router.get("/leads", authenticate, requirePermission("leads:view"), listLeads);
@@ -116,13 +126,13 @@ router.post("/contacts/:id/reply", authenticate, requirePermission("contacts:rep
 router.delete("/contacts/:id", authenticate, requirePermission("contacts:delete"), deleteContact);
 
 // ---- subscribers ----
-router.get("/subscribers", authenticate, requirePermission("content:view"), listSubscribers);
-router.delete("/subscribers/:id", authenticate, requirePermission("content:delete"), deleteSubscriber);
+router.get("/subscribers", authenticate, requirePermission("subscribers:view"), listSubscribers);
+router.delete("/subscribers/:id", authenticate, requirePermission("subscribers:delete"), deleteSubscriber);
 
 // ---- estimates ----
-router.get("/estimates", authenticate, requirePermission("leads:view"), listEstimates);
-router.patch("/estimates/:id", authenticate, requirePermission("leads:update"), validate(estimateStatusSchema), updateEstimate);
-router.delete("/estimates/:id", authenticate, requirePermission("leads:delete"), deleteEstimate);
+router.get("/estimates", authenticate, requirePermission("estimates:view"), listEstimates);
+router.patch("/estimates/:id", authenticate, requirePermission("estimates:update"), validate(estimateStatusSchema), updateEstimate);
+router.delete("/estimates/:id", authenticate, requirePermission("estimates:delete"), deleteEstimate);
 
 // ---- notifications ----
 router.get("/notifications", authenticate, requirePermission("dashboard:view"), listNotifications);
@@ -140,7 +150,7 @@ router.get("/permissions", authenticate, requirePermission("roles:manage"), list
 router.post("/permissions", authenticate, requirePermission("roles:manage"), upsertPermission);
 
 // ---- settings (CMS) & SEO ----
-router.get("/settings", authenticate, requirePermission("content:view"), getSettings);
+router.get("/settings", authenticate, requirePermission("settings:manage"), getSettings);
 router.put("/settings", authenticate, requirePermission("settings:manage"), updateSettings);
 router.delete("/settings/:group/:key", authenticate, requirePermission("settings:manage"), deleteSetting);
 

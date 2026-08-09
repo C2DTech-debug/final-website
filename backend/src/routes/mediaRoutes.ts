@@ -18,8 +18,8 @@ const upload = multer({
   },
 });
 
-router.get("/", authenticate, requirePermission("media:manage"), listMedia);
-router.post("/", authenticate, requirePermission("media:manage"), upload.single("file"), uploadMedia);
-router.delete("/:id", authenticate, requirePermission("media:manage"), deleteMedia);
+router.get("/", authenticate, requirePermission("media:view"), listMedia);
+router.post("/", authenticate, requirePermission("media:upload"), upload.single("file"), uploadMedia);
+router.delete("/:id", authenticate, requirePermission("media:delete"), deleteMedia);
 
 export default router;
