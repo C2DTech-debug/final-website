@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import type { Blog, Job } from "@/types";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.c2dtech.com";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const STATIC_ROUTES = [
