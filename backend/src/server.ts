@@ -62,7 +62,13 @@ async function bootstrap() {
   app.use(
     cors({
       origin(origin, cb) {
-        if (!origin || env.CLIENT_URLS.includes(origin)) return cb(null, true);
+        if (!origin) return cb(null, true);
+        const allowed =
+          env.CLIENT_URLS.includes(origin) ||
+          // Vercel preview/branch deployments get fresh subdomains each push
+          // (e.g. c2dtech-frontend-<hash>-<user>.vercel.app), so allow them all.
+          /(^|\.)vercel\.app$/.test(origin);
+        if (allowed) return cb(null, true);
         cb(new Error("Not allowed by CORS"));
       },
       credentials: true,
