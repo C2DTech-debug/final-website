@@ -1,4 +1,9 @@
-import type { Blog, HomeBundle, Job, SeoSetting, Service, TeamMember } from "@/types";
+import type { Blog, HomeBundle, Job, PortfolioProject, SeoSetting, Service, TeamMember } from "@/types";
+
+export interface PortfolioListResult {
+  data: PortfolioProject[];
+  categories: string[];
+}
 
 export interface BlogListResult {
   data: Blog[];
@@ -38,6 +43,20 @@ export async function getServices(): Promise<Service[] | null> {
 
 export async function getTeam(): Promise<TeamMember[] | null> {
   return fetchJson<TeamMember[]>("/api/v1/public/team");
+}
+
+export async function getPortfolio(): Promise<PortfolioListResult | null> {
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/public/portfolio`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data?: PortfolioProject[]; meta?: { categories?: string[] } };
+    return {
+      data: json.data ?? [],
+      categories: json.meta?.categories ?? [],
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getBlogs(params: { page?: number; category?: string } = {}): Promise<BlogListResult | null> {

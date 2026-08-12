@@ -1,101 +1,33 @@
-"use client";
-
-import * as React from "react";
-import { Search } from "lucide-react";
-import { usePublicPortfolio } from "@/hooks/useSite";
+import type { Metadata } from "next";
+import { getPortfolio, getSeoForPage } from "@/lib/server";
 import { PageHeader } from "@/components/site/page-header";
-import { PortfolioCard } from "@/components/site/portfolio-card";
-import { Stagger } from "@/components/site/reveal";
-import { BrandedLoader } from "@/components/site/branded-loader";
-import { PortfolioEmptyState, PortfolioNoResults, PortfolioErrorState } from "@/components/site/portfolio-states";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { PortfolioBrowser } from "@/components/site/portfolio-browser";
+import { AnalyticsTracker } from "@/components/site/analytics-tracker";
+import { CtaSection } from "@/components/site/home/cta";
+import { NewsletterSection } from "@/components/site/newsletter-section";
 
-function PortfolioContent() {
-  const [category, setCategory] = React.useState("All");
-  const [q, setQ] = React.useState("");
-  const [debouncedQ, setDebouncedQ] = React.useState("");
-  const { data, isLoading, isError, refetch } = usePublicPortfolio({ category, q: debouncedQ });
+export const revalidate = 60;
 
-  React.useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(q), 350);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  const categories = data?.meta?.categories ?? [];
-  const projects = data?.data ?? [];
-  // Categories are derived from published projects, so a non-empty list means
-  // projects genuinely exist even when the current filter returns nothing.
-  const hasProjects = projects.length > 0 || categories.length > 0;
-  const hasActiveFilters = category !== "All" || q !== "";
-
-  const clearFilters = () => {
-    setCategory("All");
-    setQ("");
-    setDebouncedQ("");
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoForPage("portfolio");
+  return {
+    title: seo?.title || "Portfolio — C2D Tech",
+    description:
+      seo?.description ||
+      "Explore selected web platforms and mobile apps deployed by C2D Tech for clients in Trichy and beyond.",
+    keywords: seo?.keywords,
+    alternates: { canonical: "/portfolio" },
   };
-
-  if (isLoading) {
-    return <BrandedLoader label="Loading the portfolio…" />;
-  }
-
-  if (isError && !data) {
-    return <PortfolioErrorState onRetry={() => refetch()} />;
-  }
-
-  return (
-    <>
-      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter by category">
-          {["All", ...categories].map((cat) => (
-            <button
-              key={cat}
-              role="tab"
-              aria-selected={category === cat}
-              onClick={() => setCategory(cat)}
-              className={cn(
-                "rounded-full border px-4 py-1.5 text-sm font-medium transition-colors",
-                category === cat
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-primary"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Search projects…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" aria-label="Search projects" />
-        </div>
-      </div>
-
-      {projects.length ? (
-        <>
-          <Stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {projects.map((project) => (
-              <PortfolioCard key={project._id} project={project} />
-            ))}
-          </Stagger>
-          {hasActiveFilters && (
-            <div className="mt-10 flex justify-center">
-              <Button variant="outline" onClick={clearFilters}>Clear filters</Button>
-            </div>
-          )}
-        </>
-      ) : hasProjects ? (
-        <PortfolioNoResults onClear={clearFilters} hasActiveFilters={hasActiveFilters} />
-      ) : (
-        <PortfolioEmptyState />
-      )}
-    </>
-  );
 }
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const result = await getPortfolio();
+  const projects = result?.data ?? [];
+  const categories = result?.categories ?? [];
+
   return (
     <>
+      <AnalyticsTracker />
       <PageHeader
         eyebrow="Our work"
         title="The C2D Tech portfolio"
@@ -104,9 +36,11 @@ export default function PortfolioPage() {
       />
       <section className="pb-24">
         <div className="container">
-          <PortfolioContent />
+          <PortfolioBrowser initialProjects={projects} initialCategories={categories} />
         </div>
       </section>
+      <CtaSection />
+      <NewsletterSection />
     </>
   );
 }
