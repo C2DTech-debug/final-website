@@ -64,7 +64,10 @@ export function formatTime(value?: string | Date | null): string {
   if (!value) return "—";
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
+  // Attendance times are recorded on the backend in UTC; always render them in
+  // the team's timezone (Asia/Kolkata) so the clocked-in time is never shifted.
   return new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,

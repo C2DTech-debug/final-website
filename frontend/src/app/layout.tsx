@@ -22,6 +22,9 @@ export const metadata: Metadata = {
     template: "%s | C2D Tech",
   },
   description: SITE_DESCRIPTION,
+  verification: {
+    google: "ZdXy2bjnY1fj49Mw2SLbJhY2O6YH8J7ZjUrPumD1Dus",
+  },
   keywords: [
     "C2D Tech",
     "Concept to Deploy",

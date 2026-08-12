@@ -1,11 +1,19 @@
 import { AttendanceRecordModel } from "../models/AttendanceRecord";
 import { AdminUserModel } from "../models/AdminUser";
 
+/** Attendance days and clock times are India-local (Asia/Kolkata). The server
+ *  itself may run in UTC (e.g. Docker), so derive the day in IST explicitly. */
+const ATTENDANCE_TIME_ZONE = "Asia/Kolkata";
+
 export function todayStr(d = new Date()): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: ATTENDANCE_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")}`;
 }
 
 /** Marks the user as clocked-in for today (idempotent; keeps earliest clockIn).
