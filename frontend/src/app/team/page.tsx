@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getSeoForPage, getTeam } from "@/lib/server";
 import type { TeamMember } from "@/types";
 import { PageHeader } from "@/components/site/page-header";
-import { TeamCard } from "@/components/site/team-card";
-import { Stagger } from "@/components/site/reveal";
+import { TeamAccordion } from "@/components/site/team-accordion";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AnalyticsTracker } from "@/components/site/analytics-tracker";
 import { CtaSection } from "@/components/site/home/cta";
@@ -21,19 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function TeamGrid({ members }: { members: TeamMember[] | null }) {
-  if (!members?.length) {
-    return <EmptyState title="Team members coming soon" description="We're growing — check back shortly." />;
-  }
-  return (
-    <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {members.map((member) => (
-        <TeamCard key={member._id} member={member} />
-      ))}
-    </Stagger>
-  );
-}
-
 export default async function TeamPage() {
   const members = await getTeam();
   return (
@@ -46,8 +32,12 @@ export default async function TeamPage() {
         crumb="Team"
       />
       <section className="pb-24">
-        <div className="container">
-          <TeamGrid members={members} />
+        <div className="container max-w-6xl">
+          {members && members.length > 0 ? (
+            <TeamAccordion members={members} />
+          ) : (
+            <EmptyState title="Team members coming soon" description="We're growing — check back shortly." />
+          )}
         </div>
       </section>
       <CtaSection />

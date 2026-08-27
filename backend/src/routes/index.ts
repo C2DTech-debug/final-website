@@ -13,6 +13,7 @@ import taskRoutes from "./taskRoutes";
 import attendanceRoutes from "./attendanceRoutes";
 import payrollRoutes from "./payrollRoutes";
 import paymentRoutes from "./paymentRoutes";
+import agreementRoutes, { publicAgreementRouter } from "./agreementRoutes";
 import { standardLimiter, strictLimiter } from "../middleware/rateLimit";
 
 const router = Router();
@@ -32,6 +33,7 @@ router.get("/health", (_req, res) => {
 });
 
 router.use("/public", publicRoutes);
+router.use("/public/agreements", publicAgreementRouter);
 router.use("/analytics/visit", standardLimiter, trackVisit);
 router.use("/contact", contactRoutes);
 router.use("/newsletter", newsletterRoutes);
@@ -45,5 +47,7 @@ router.use("/admin/tasks", taskRoutes);
 router.use("/admin/attendance", attendanceRoutes);
 router.use("/admin/payroll", payrollRoutes);
 router.use("/admin/payments", paymentRoutes);
+router.use("/admin/agreements", agreementRoutes);
 
 export default router;
+

@@ -10,13 +10,12 @@ export function PortfolioEmptyState() {
 
       <div className="relative mx-auto flex max-w-xl flex-col items-center">
         <div className="relative">
-          <span className="pointer-events-none absolute -inset-2 rounded-full bg-gradient-to-br from-violet-500/40 via-fuchsia-500/40 to-cyan-400/40 blur-lg" />
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400 shadow-lg shadow-primary/40">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-[#4274D9] text-white shadow-md">
             <Rocket className="h-7 w-7 text-white" />
           </div>
         </div>
-        <h3 className="mt-6 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-          Something great is <span className="text-gradient">being built</span>
+        <h3 className="mt-6 font-display text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+          Something great is <span className="text-[#4274D9]">being built</span>
         </h3>
         <p className="mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
           We&apos;re crafting our first collection of digital experiences — websites, apps and AI products for real-world

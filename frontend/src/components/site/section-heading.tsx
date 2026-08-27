@@ -18,13 +18,8 @@ export function SectionHeading({ eyebrow, title, description, align = "center", 
         className
       )}
     >
-      {eyebrow && (
-        <span className="mb-3 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-          {eyebrow}
-        </span>
-      )}
-      <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
-      {description && <p className="mt-4 text-muted-foreground md:text-lg">{description}</p>}
+      <h2 className="font-display text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-4xl">{title}</h2>
+      {description && <p className="mt-3.5 text-slate-600 dark:text-slate-300 md:text-lg leading-relaxed">{description}</p>}
     </Reveal>
   );
 }

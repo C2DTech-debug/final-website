@@ -62,13 +62,10 @@ export default async function BlogDetailsPage({ params }: Props) {
               >
                 <ArrowLeft className="h-4 w-4" /> All posts
               </Link>
-              <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-                {post.category}
-              </span>
-              <h1 className="mt-4 max-w-3xl font-display text-3xl font-bold tracking-tight md:text-5xl">{post.title}</h1>
+              <h1 className="mt-4 max-w-3xl font-display text-3xl font-extrabold tracking-tight md:text-5xl">{post.title}</h1>
               <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                <span className="flex items-center gap-2 font-medium text-foreground">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-600/30 to-cyan-500/30 text-xs font-bold">
+                <span className="flex items-center gap-2 font-semibold text-slate-900 dark:text-white">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#D0E7E6] text-xs font-bold text-[#293681]">
                     {post.authorName.slice(0, 2).toUpperCase()}
                   </span>
                   {post.authorName}

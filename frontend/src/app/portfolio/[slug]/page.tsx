@@ -52,19 +52,16 @@ export default async function PortfolioDetailsPage({ params }: Props) {
             <span className="text-foreground">{project.title}</span>
           </nav>
           <Reveal>
-            <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-              {project.category}
-            </span>
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold tracking-tight md:text-5xl">{project.title}</h1>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-5xl">{project.title}</h1>
             <p className="mt-4 max-w-2xl text-muted-foreground md:text-lg">{project.shortDescription}</p>
             <div className="mt-6 flex flex-wrap gap-3">
               {project.liveUrl && (
-                <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+                <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#4274D9] px-6 text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#3462c7] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
                   <ExternalLink className="h-4 w-4" /> Live Site
                 </a>
               )}
               {project.githubUrl && (
-                <a href={project.githubUrl} target="_blank" rel="noreferrer" className="inline-flex h-10 items-center gap-2 rounded-lg border px-5 text-sm font-semibold transition-colors hover:border-primary/50">
+                <a href={project.githubUrl} target="_blank" rel="noreferrer" className="inline-flex h-11 items-center gap-2 rounded-lg border-2 border-[#95CCDD] bg-white px-6 text-sm font-bold text-[#293681] shadow-sm transition-all duration-200 hover:border-[#4274D9] hover:bg-[#D0E7E6]/30 hover:text-[#4274D9] hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-white">
                   <Github className="h-4 w-4" /> Source Code
                 </a>
               )}
@@ -81,7 +78,7 @@ export default async function PortfolioDetailsPage({ params }: Props) {
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={project.coverImage} alt={project.title} className="aspect-[16/9] w-full object-cover" />
               ) : (
-                <div className="flex aspect-[16/9] w-full items-center justify-center bg-gradient-to-br from-violet-600/30 via-fuchsia-500/20 to-cyan-500/30 text-4xl font-bold text-white">
+                <div className="flex aspect-[16/9] w-full items-center justify-center bg-[#293681] text-4xl font-extrabold text-[#95CCDD]">
                   {project.title.slice(0, 2).toUpperCase()}
                 </div>
               )}
@@ -154,7 +151,7 @@ export default async function PortfolioDetailsPage({ params }: Props) {
               </div>
               <div className="rounded-2xl border bg-card p-6 text-center">
                 <p className="font-display text-lg font-semibold">Want something like this?</p>
-                <Link href="/contact" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
+                <Link href="/contact" className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#4274D9] text-sm font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#3462c7] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]">
                   Start a project
                 </Link>
               </div>

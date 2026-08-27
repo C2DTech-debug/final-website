@@ -108,9 +108,9 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
           <FormError id="cf-phone-error" message={errors.phone?.message} />
         </div>
         <div className="space-y-2">
-          <Label>Service</Label>
+          <Label htmlFor="cf-service">Service</Label>
           <Select value={watch("service")} onValueChange={(v) => setValue("service", v)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger id="cf-service" aria-label="Select a service" className="w-full">
               <SelectValue placeholder="Select a service" />
             </SelectTrigger>
             <SelectContent>
@@ -127,9 +127,9 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>Budget</Label>
+          <Label htmlFor="cf-budget">Budget</Label>
           <Select value={watch("budget")} onValueChange={(v) => setValue("budget", v)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger id="cf-budget" aria-label="Select budget range" className="w-full">
               <SelectValue placeholder="Select budget range" />
             </SelectTrigger>
             <SelectContent>
@@ -142,9 +142,9 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Timeline</Label>
+          <Label htmlFor="cf-timeline">Timeline</Label>
           <Select value={watch("timeline")} onValueChange={(v) => setValue("timeline", v)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger id="cf-timeline" aria-label="Select timeline" className="w-full">
               <SelectValue placeholder="When do you need it?" />
             </SelectTrigger>
             <SelectContent>
@@ -172,7 +172,7 @@ export function ContactForm({ defaultService = "" }: { defaultService?: string }
         <FormError id="cf-message-error" message={errors.message?.message} />
       </div>
 
-      <Button type="submit" size="lg" className="w-full" disabled={mutation.isPending}>
+      <Button type="submit" size="lg" variant="default" className="w-full h-12 text-base font-bold rounded-lg" disabled={mutation.isPending}>
         {mutation.isPending ? <Spinner /> : "Send Message"}
       </Button>
     </form>

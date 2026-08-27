@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Rocket } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useLogin, useVerify2FA } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
@@ -87,12 +87,10 @@ export default function AdminLoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
       <div className="absolute inset-0 -z-10 bg-grid-pattern bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
-      <div className="absolute -top-32 left-1/2 -z-10 h-[360px] w-[640px] -translate-x-1/2 rounded-full bg-primary/20 blur-[120px]" />
-
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400 shadow-lg shadow-primary/30">
-            <Rocket className="h-7 w-7 text-white" />
+          <span className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-black shadow-lg">
+            <Image src="/brand-logo.png" alt="C2D Admin" width={64} height={64} className="h-full w-full object-cover" priority />
           </span>
           <h1 className="mt-4 font-display text-2xl font-bold">C2D Admin</h1>
           <p className="mt-1 text-sm text-muted-foreground">Sign in to the control panel</p>

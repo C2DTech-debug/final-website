@@ -116,7 +116,7 @@ export default async function CareersPage() {
                 )}
                 <Link
                   href="/contact"
-                  className="inline-flex h-11 w-fit items-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                  className="inline-flex h-11 w-fit items-center gap-2 rounded-lg bg-[#4274D9] px-6 font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#3462c7] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
                 >
                   Start the conversation <ArrowRight className="h-4 w-4" />
                 </Link>

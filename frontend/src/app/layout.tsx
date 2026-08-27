@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteChrome } from "@/components/site/site-chrome";
@@ -7,8 +7,30 @@ import { SiteNavbar } from "@/components/site/navbar";
 import { SiteFooter } from "@/components/site/footer";
 import { ScrollProgress } from "@/components/site/scroll-progress";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+  preload: true,
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  preload: true,
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#09090b" },
+  ],
+};
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.c2dtech.com";
 const SITE_TITLE = "C2D Tech (Concept to Deploy) — Websites, Mobile Apps & AI Automation";
@@ -36,6 +58,14 @@ export const metadata: Metadata = {
     "website design company",
   ],
   applicationName: "C2D Tech",
+  icons: {
+    icon: [
+      { url: "/brand-logo.png", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    shortcut: "/brand-logo.png",
+    apple: "/brand-logo.png",
+  },
   openGraph: {
     type: "website",
     siteName: "C2D Tech",
@@ -62,19 +92,12 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
-  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans`}>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <body className={`${inter.variable} ${plusJakartaSans.variable} font-sans`}>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
             <SiteChrome navbar={<><ScrollProgress /><SiteNavbar /></>} footer={<SiteFooter />}>

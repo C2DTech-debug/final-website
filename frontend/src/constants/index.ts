@@ -23,6 +23,7 @@ import {
   CalendarClock,
   Coins,
   Wallet,
+  FileSignature,
 } from "lucide-react";
 
 export const SITE_NAME = "C2D Tech";
@@ -135,6 +136,20 @@ export function paymentStatusColor(status: string): string {
   return PAYMENT_STATUSES.find((s) => s.value === status)?.color || "bg-muted text-muted-foreground";
 }
 
+export const AGREEMENT_STATUSES = [
+  { value: "draft", label: "Draft", color: "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30" },
+  { value: "sent", label: "Sent", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30" },
+  { value: "viewed", label: "Viewed", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30" },
+  { value: "signed", label: "Signed 🔒", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30" },
+  { value: "expired", label: "Expired", color: "bg-orange-500/15 text-orange-600 dark:text-orange-400 border-orange-500/30" },
+  { value: "cancelled", label: "Cancelled", color: "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30" },
+] as const;
+
+export function agreementStatusColor(status: string): string {
+  return AGREEMENT_STATUSES.find((s) => s.value === status)?.color || "bg-muted text-muted-foreground";
+}
+
+
 export const PORTFOLIO_STATUSES = [
   { value: "draft", label: "Draft" },
   { value: "published", label: "Published" },
@@ -180,6 +195,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { title: "Leads", href: "/admin/leads", icon: Users, badge: "CRM", permission: "leads:view" },
   { title: "Estimates", href: "/admin/estimates", icon: Calculator, permission: "estimates:view" },
   { title: "Payments", href: "/admin/payments", icon: Wallet, permission: "payments:view" },
+  { title: "Agreements", href: "/admin/agreements", icon: FileSignature, badge: "eSign", permission: "agreements:view" },
   { title: "Analytics", href: "/admin/analytics", icon: BarChart3, permission: "analytics:view" },
   { title: "Newsletter", href: "/admin/newsletter", icon: Mail, permission: "subscribers:view" },
   { title: "Blog", href: "/admin/blogs", icon: FileText, section: "Content", permission: "blogs:view" },

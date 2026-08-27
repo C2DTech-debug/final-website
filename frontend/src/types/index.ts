@@ -110,6 +110,19 @@ export const PERMISSIONS = [
   "attendance:view",
   "attendance:view_all",
   "payroll:view",
+  "payments:view",
+  "payments:view_details",
+  "payments:create",
+  "payments:link_create",
+  "payments:send_whatsapp",
+  "payments:resend_whatsapp",
+  "payments:cancel",
+  "agreements:view",
+  "agreements:create",
+  "agreements:update",
+  "agreements:delete",
+  "agreements:sign_link",
+  "agreements:download",
 ] as const;
 
 export type PermissionName = (typeof PERMISSIONS)[number];
@@ -874,3 +887,139 @@ export interface PaymentStats {
   outstandingPaise: number;
   byStatus: { _id: string; count: number }[];
 }
+
+// ---------- Agreements ----------
+
+export type AgreementStatus = "draft" | "sent" | "viewed" | "signed" | "expired" | "cancelled";
+
+export const AGREEMENT_STATUS_LABELS: Record<string, string> = {
+  draft: "Draft",
+  sent: "Sent",
+  viewed: "Viewed",
+  signed: "Signed 🔒",
+  expired: "Expired",
+  cancelled: "Cancelled",
+};
+
+export interface AgreementAuditItem {
+  _id?: string;
+  timestamp: string;
+  action: string;
+  description: string;
+  actor: string;
+  ip?: string;
+  userAgent?: string;
+  documentHash?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface Agreement {
+  _id: string;
+  agreementNumber: string;
+  publicToken: string;
+  version: number;
+  status: AgreementStatus;
+  client: {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    company?: string;
+    leadId?: { _id: string; leadId: string; name: string; company?: string; phone?: string; email?: string } | string;
+  };
+  project: {
+    name: string;
+    description: string;
+    scope: string;
+    totalAmount: number;
+    currency: string;
+    advancePercentage: number;
+    advanceAmount: number;
+    finalPercentage: number;
+    finalAmount: number;
+  };
+  agreementDetails: {
+    agreementDate: string;
+    expiryDate?: string;
+    title: string;
+    body: string;
+    termsAndConditions?: string;
+    cancellationTerms?: string;
+    supportTerms?: string;
+    additionalNotes?: string;
+  };
+  developer: {
+    name: string;
+    phone: string;
+    email: string;
+    companyName: string;
+    companyAddress: string;
+    companyWebsite: string;
+    logoUrl?: string;
+  };
+  signing: {
+    mode: "digital_signature" | "cca_esign";
+    provider: "dsc_pkcs7" | "emudhra" | "protean" | "cdac";
+    providerReference?: string;
+    signerName?: string;
+    signerEmail?: string;
+    signerPhone?: string;
+    signedAt?: string | null;
+    signerIp?: string;
+    signerUserAgent?: string;
+    documentHash?: string;
+    signatureAlgorithm?: string;
+    digitalSignatureValue?: string;
+    certificateIssuer?: string;
+    signatureImage?: string;
+    signatureType?: "drawn" | "typed";
+    signedDocumentUrl?: string;
+  };
+  auditTrail: AgreementAuditItem[];
+  createdBy?: { _id: string; name: string; email: string } | string | null;
+  versions?: AgreementVersion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgreementVersion {
+  _id: string;
+  agreementId: string;
+  agreementNumber: string;
+  version: number;
+  status: string;
+  snapshot: Record<string, unknown>;
+  documentHash?: string;
+  signedAt?: string;
+  signedDocumentUrl?: string;
+  signingProvider?: string;
+  signingReference?: string;
+  createdAt: string;
+}
+
+export interface AgreementStats {
+  total: number;
+  draft: number;
+  sent: number;
+  viewed: number;
+  signed: number;
+  expired: number;
+  cancelled: number;
+  signedValue: number;
+  pipelineValue: number;
+  byStatus: { _id: string; count: number }[];
+}
+
+export interface AgreementTemplate {
+  id: string;
+  name: string;
+  description: string;
+  title: string;
+  scope: string;
+  body: string;
+  terms: string;
+  cancellation: string;
+  support: string;
+  defaultAdvancePercentage: number;
+}
+

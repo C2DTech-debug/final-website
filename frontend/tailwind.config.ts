@@ -44,8 +44,22 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        brand: {
+          navy: "hsl(var(--brand-navy))",
+          blue: "hsl(var(--brand-blue))",
+          ice: "hsl(var(--brand-ice))",
+          mint: "hsl(var(--brand-mint))",
+        },
+      },
+      boxShadow: {
+        "t4teq": "0 10px 30px -5px rgba(41, 54, 129, 0.08)",
+        "t4teq-lg": "0 20px 40px -10px rgba(41, 54, 129, 0.14)",
+        "t4teq-glow": "0 0 25px rgba(66, 116, 217, 0.35)",
       },
       borderRadius: {
+        pill: "100px",
+        "3xl": "1.75rem",
+        "2xl": "1.25rem",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",

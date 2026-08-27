@@ -232,7 +232,8 @@ export function EstimatorForm() {
           </div>
           <Button
             type="submit"
-            className="mt-6 w-full"
+            variant="default"
+            className="mt-6 w-full h-12 text-base font-bold rounded-lg"
             size="lg"
             disabled={selected.length === 0 || submitMutation.isPending}
           >
@@ -243,13 +244,13 @@ export function EstimatorForm() {
 
       <div>
         <div className="sticky top-24 rounded-2xl border bg-card p-6">
-          <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
-            <Calculator className="h-5 w-5 text-primary" /> Your estimate
+          <h2 className="flex items-center gap-2 font-display text-xl font-bold text-slate-900 dark:text-white">
+            <Calculator className="h-5 w-5 text-[#4274D9]" /> Your estimate
           </h2>
           {quote ? (
             <div className="mt-5">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Estimated cost</p>
-              <p className="mt-1 flex items-center gap-1 font-display text-4xl font-bold text-gradient">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Estimated cost</p>
+              <p className="mt-1 flex items-center gap-1 font-display text-4xl font-extrabold text-[#293681] dark:text-[#95CCDD]">
                 <IndianRupee className="h-7 w-7" />
                 {quote.totalCost.toLocaleString("en-IN")}
               </p>

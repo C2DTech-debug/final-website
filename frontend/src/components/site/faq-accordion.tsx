@@ -25,13 +25,17 @@ export function FaqAccordion({ faqs, defaultOpen = 0 }: { faqs: Faq[]; defaultOp
               onClick={() => setOpen(isOpen ? null : i)}
               className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
               aria-expanded={isOpen}
+              aria-controls={`faq-answer-${faq._id}`}
             >
               <span className="font-medium">{faq.question}</span>
-              <Plus className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200", isOpen && "rotate-45")} />
+              <Plus className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200", isOpen && "rotate-45")} aria-hidden="true" />
             </button>
             <AnimatePresence initial={false}>
               {isOpen && (
                 <motion.div
+                  id={`faq-answer-${faq._id}`}
+                  role="region"
+                  aria-labelledby={`faq-btn-${faq._id}`}
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}

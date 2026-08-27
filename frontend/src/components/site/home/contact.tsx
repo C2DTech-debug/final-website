@@ -33,13 +33,13 @@ export function ContactSection({ settings }: { settings: PublicSettings }) {
           <Reveal delay={0.15} className="lg:col-span-2">
             <div className="flex h-full flex-col gap-4">
               {items.map(({ icon: Icon, label, value }) => (
-                <div key={label} className="flex items-start gap-4 rounded-2xl border bg-card p-5">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-white">
+                <div key={label} className="flex items-start gap-4 rounded-xl border border-slate-200/90 bg-card p-5 shadow-sm dark:border-slate-800">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#D0E7E6] text-[#293681] dark:bg-[#4274D9]/20 dark:text-[#95CCDD]">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-                    <p className="mt-1 text-sm font-medium">{value}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{label}</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{value}</p>
                   </div>
                 </div>
               ))}

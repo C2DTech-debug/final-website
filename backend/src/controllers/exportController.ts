@@ -4,6 +4,7 @@ import { NewsletterSubscriberModel } from "../models/NewsletterSubscriber";
 import { ProjectEstimateModel } from "../models/ProjectEstimate";
 import { LeadModel } from "../models/Lead";
 import { JobApplicationModel } from "../models/JobApplication";
+import { AgreementModel } from "../models/Agreement";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 import { logActivity } from "../services/activityService";
@@ -114,12 +115,38 @@ async function exportApplications(): Promise<{ rows: Record<string, unknown>[]; 
   };
 }
 
+async function exportAgreements(): Promise<{ rows: Record<string, unknown>[]; filename: string }> {
+  const docs = (await AgreementModel.find().sort({ createdAt: -1 }).lean()) as unknown as Record<string, any>[];
+  return {
+    rows: docs.map((d) => ({
+      agreementNumber: d.agreementNumber,
+      version: d.version,
+      status: d.status,
+      clientName: d.client?.name,
+      clientPhone: d.client?.phone,
+      clientEmail: d.client?.email,
+      clientCompany: d.client?.company,
+      projectName: d.project?.name,
+      totalAmount: d.project?.totalAmount,
+      currency: d.project?.currency,
+      advanceAmount: d.project?.advanceAmount,
+      finalAmount: d.project?.finalAmount,
+      signedAt: d.signing?.signedAt,
+      signedBy: d.signing?.signerName,
+      documentHash: d.signing?.documentHash,
+      createdAt: d.createdAt,
+    })),
+    filename: "agreements",
+  };
+}
+
 const SOURCES: Record<string, () => Promise<{ rows: Record<string, unknown>[]; filename: string }>> = {
   contacts: exportContacts,
   subscribers: exportSubscribers,
   estimates: exportEstimates,
   leads: exportLeads,
   applications: exportApplications,
+  agreements: exportAgreements,
 };
 
 export const exportCsv = asyncHandler(async (req: Request, res: Response) => {

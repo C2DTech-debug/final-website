@@ -132,9 +132,16 @@ export const PERMISSION_CATALOG: PermissionDef[] = [
   { name: "payments:link_create", label: "Generate payment links", description: "Generate Razorpay payment links for approved requests.", module: "payments", action: "link_create", group: "Payments" },
   { name: "payments:send_whatsapp", label: "Send via WhatsApp", description: "Send the payment link to the client on WhatsApp.", module: "payments", action: "send_whatsapp", group: "Payments" },
   { name: "payments:resend_whatsapp", label: "Resend via WhatsApp", description: "Resend the payment link to the client on WhatsApp.", module: "payments", action: "resend_whatsapp", group: "Payments" },
-  { name: "payments:cancel", label: "Cancel payment requests", description: "Cancel payment requests before they are paid.", module: "payments", action: "cancel", group: "Payments" },
+  // ---- Agreements ----
+  { name: "agreements:view", label: "View agreements", description: "See agreement list, status and summaries.", module: "agreements", action: "view", group: "Agreements" },
+  { name: "agreements:create", label: "Create agreements", description: "Create new client agreements and drafts.", module: "agreements", action: "create", group: "Agreements" },
+  { name: "agreements:update", label: "Edit agreements", description: "Edit draft agreements and details.", module: "agreements", action: "update", group: "Agreements" },
+  { name: "agreements:delete", label: "Delete agreements", description: "Delete draft agreements.", module: "agreements", action: "delete", group: "Agreements" },
+  { name: "agreements:sign_link", label: "Generate signing link", description: "Generate secure signing links for clients.", module: "agreements", action: "sign_link", group: "Agreements" },
+  { name: "agreements:download", label: "Download signed PDF", description: "Download agreement PDFs and audit trails.", module: "agreements", action: "download", group: "Agreements" },
 ];
 
 export const PERMISSIONS = PERMISSION_CATALOG.map((p) => p.name);
 
 export type PermissionName = (typeof PERMISSIONS)[number];
+

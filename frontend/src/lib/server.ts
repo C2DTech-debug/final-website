@@ -16,11 +16,11 @@ export interface BlogListResult {
   };
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}${path}`, { cache: "no-store" });
     if (!res.ok) return null;
     const json = (await res.json()) as { data: T };
     return json.data ?? null;
@@ -47,7 +47,7 @@ export async function getTeam(): Promise<TeamMember[] | null> {
 
 export async function getPortfolio(): Promise<PortfolioListResult | null> {
   try {
-    const res = await fetch(`${API_BASE}/api/v1/public/portfolio`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/api/v1/public/portfolio`, { cache: "no-store" });
     if (!res.ok) return null;
     const json = (await res.json()) as { data?: PortfolioProject[]; meta?: { categories?: string[] } };
     return {
@@ -65,7 +65,7 @@ export async function getBlogs(params: { page?: number; category?: string } = {}
   if (params.category && params.category !== "All") search.set("category", params.category);
   const query = search.toString();
   try {
-    const res = await fetch(`${API_BASE}/api/v1/public/blogs${query ? `?${query}` : ""}`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API_BASE}/api/v1/public/blogs${query ? `?${query}` : ""}`, { cache: "no-store" });
     if (!res.ok) return null;
     const json = (await res.json()) as {
       data: Blog[];
@@ -78,7 +78,7 @@ export async function getBlogs(params: { page?: number; category?: string } = {}
         limit: json.meta?.limit ?? 12,
         total: json.meta?.total ?? 0,
         pages: json.meta?.pages ?? 0,
-        categories: json.meta?.categories,
+        categories: json.meta?.categories ?? [],
       },
     };
   } catch {

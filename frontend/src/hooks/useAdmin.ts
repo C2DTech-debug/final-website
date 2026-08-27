@@ -3,6 +3,9 @@ import { api, apiFetchPaginated, qs } from "@/lib/api";
 import type {
   AdminUser,
   ActivityLog,
+  Agreement,
+  AgreementStats,
+  AgreementVersion,
   AnalyticsOverview,
   AttendanceRecord,
   Blog,
@@ -754,3 +757,92 @@ export function useCancelPayment() {
     onSuccess: (_data, id) => invalidatePayments(qc, id),
   });
 }
+
+// ---------- Agreements ----------
+
+export const agreementKeys = {
+  all: ["admin", "agreements"] as const,
+  list: (params: Record<string, string> = {}) => ["admin", "agreements", "list", params] as const,
+  detail: (id: string) => ["admin", "agreements", "detail", id] as const,
+  stats: ["admin", "agreements", "stats"] as const,
+};
+
+export function useAgreements(params: Record<string, string> = {}) {
+  return useQuery({
+    queryKey: agreementKeys.list(params),
+    queryFn: () => apiFetchPaginated<Agreement>(`/api/v1/admin/agreements${qs(params)}`),
+  });
+}
+
+export function useAgreement(id: string) {
+  return useQuery({
+    queryKey: agreementKeys.detail(id),
+    queryFn: () => api.get<Agreement & { versions?: AgreementVersion[] }>(`/api/v1/admin/agreements/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+export function useAgreementStats() {
+  return useQuery({
+    queryKey: agreementKeys.stats,
+    queryFn: () => api.get<AgreementStats>("/api/v1/admin/agreements/stats"),
+  });
+}
+
+function invalidateAgreements(qc: ReturnType<typeof useQueryClient>, id?: string) {
+  void qc.invalidateQueries({ queryKey: ["admin", "agreements"] });
+  if (id) void qc.invalidateQueries({ queryKey: agreementKeys.detail(id) });
+}
+
+export function useCreateAgreement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: Partial<Agreement>) => api.post<Agreement>("/api/v1/admin/agreements", body),
+    onSuccess: () => invalidateAgreements(qc),
+  });
+}
+
+export function useUpdateAgreement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: Partial<Agreement> }) =>
+      api.put<Agreement>(`/api/v1/admin/agreements/${id}`, body),
+    onSuccess: (_data, vars) => invalidateAgreements(qc, vars.id),
+  });
+}
+
+export function useDeleteAgreement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete<{ message: string }>(`/api/v1/admin/agreements/${id}`),
+    onSuccess: () => invalidateAgreements(qc),
+  });
+}
+
+export function useGenerateAgreementLink() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.post<{ publicToken: string; status: string; signingUrl: string }>(
+        `/api/v1/admin/agreements/${id}/generate-link`
+      ),
+    onSuccess: (_data, id) => invalidateAgreements(qc, id),
+  });
+}
+
+export function useCreateAgreementVersion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Agreement>(`/api/v1/admin/agreements/${id}/version`),
+    onSuccess: (_data, id) => invalidateAgreements(qc, id),
+  });
+}
+
+export function useCancelAgreement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.post<Agreement>(`/api/v1/admin/agreements/${id}/cancel`),
+    onSuccess: (_data, id) => invalidateAgreements(qc, id),
+  });
+}
+

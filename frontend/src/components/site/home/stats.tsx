@@ -10,8 +10,7 @@ export function StatsSection({ settings }: { settings: PublicSettings }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="relative overflow-hidden py-16">
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-violet-600/10 via-fuchsia-500/10 to-cyan-500/10" />
+    <section className="relative overflow-hidden py-16 bg-[#D0E7E6]/20 dark:bg-slate-900/40">
       <div className="container">
         <SectionHeading eyebrow="By the numbers" title="We measure what matters" />
         <div className="grid grid-cols-2 gap-6 lg:grid-cols-4">
@@ -19,13 +18,13 @@ export function StatsSection({ settings }: { settings: PublicSettings }) {
             <Reveal key={item.label} delay={i * 0.06}>
               <motion.div
                 whileHover={{ y: -4 }}
-                className="glass rounded-2xl p-6 text-center"
+                className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-all"
               >
-                <div className="font-display text-4xl font-bold text-gradient">
+                <div className="font-display text-4xl font-extrabold text-[#293681] dark:text-[#95CCDD]">
                   <span>{item.value.toLocaleString("en-IN")}</span>
-                  {item.suffix && <span className="text-2xl">{item.suffix}</span>}
+                  {item.suffix && <span className="text-2xl text-[#4274D9]">{item.suffix}</span>}
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{item.label}</p>
+                <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-400">{item.label}</p>
               </motion.div>
             </Reveal>
           ))}

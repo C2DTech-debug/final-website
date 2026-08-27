@@ -22,7 +22,7 @@ export function ProcessTimeline({ settings }: { settings: PublicSettings }) {
           {/* Desktop connecting line */}
           <div
             aria-hidden
-            className="absolute left-0 right-0 top-6 hidden h-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-cyan-400 lg:block"
+            className="absolute left-0 right-0 top-6 hidden h-0.5 bg-[#95CCDD] lg:block opacity-70"
           />
           <ol className="grid gap-x-6 gap-y-7 md:grid-cols-3 lg:grid-cols-6">
             {steps.map((step, i) => (
@@ -32,15 +32,15 @@ export function ProcessTimeline({ settings }: { settings: PublicSettings }) {
                   {i < steps.length - 1 && (
                     <span
                       aria-hidden
-                      className="absolute left-6 top-12 -bottom-2 w-0.5 bg-gradient-to-b from-violet-600 via-fuchsia-500 to-cyan-400 md:hidden"
+                      className="absolute left-6 top-12 -bottom-2 w-0.5 bg-[#95CCDD] opacity-70 md:hidden"
                     />
                   )}
-                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-cyan-400 font-display text-sm font-bold text-white shadow-md shadow-primary/25">
+                  <span className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#293681] font-display text-sm font-bold text-white shadow-sm">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <div className="min-w-0 pb-1 lg:mt-5 lg:px-1">
-                    <h3 className="font-display text-base font-semibold leading-snug">{step.title}</h3>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{step.description}</p>
+                    <h3 className="font-display text-base font-bold text-slate-900 leading-snug dark:text-white">{step.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{step.description}</p>
                   </div>
                 </li>
               </Reveal>

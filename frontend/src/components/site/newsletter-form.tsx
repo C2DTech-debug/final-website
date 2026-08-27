@@ -42,6 +42,8 @@ export function NewsletterForm({ source = "footer", compact = false }: { source?
     >
       <div className="min-w-0 flex-1 space-y-2">
         <Input
+          id={`nl-email-${source}`}
+          name="email"
           type="email"
           placeholder="Enter your email"
           value={email}
@@ -51,12 +53,12 @@ export function NewsletterForm({ source = "footer", compact = false }: { source?
           }}
           error={Boolean(error)}
           aria-invalid={Boolean(error)}
-          aria-describedby={error ? "nl-email-error" : undefined}
+          aria-describedby={error ? `nl-email-error-${source}` : undefined}
           aria-label="Email address"
         />
-        <FormError id="nl-email-error" message={error} />
+        <FormError id={`nl-email-error-${source}`} message={error} />
       </div>
-      <Button type="submit" disabled={mutation.isPending} className={compact ? "w-full sm:w-auto" : ""}>
+      <Button type="submit" variant="default" disabled={mutation.isPending} className={compact ? "w-full sm:w-auto font-bold rounded-lg" : "h-11 px-6 font-bold rounded-lg"}>
         {mutation.isPending ? <Spinner /> : "Subscribe"}
       </Button>
     </form>

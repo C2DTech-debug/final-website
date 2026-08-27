@@ -9,54 +9,71 @@ import { SEOSettingModel } from "../models/SEOSetting";
 import { ApiError } from "../utils/ApiError";
 import { asyncHandler } from "../utils/asyncHandler";
 
+import { cacheService } from "../services/cacheService";
+
 export async function getSettings() {
-  const docs = await WebsiteSettingModel.find().lean();
-  const out: Record<string, Record<string, unknown>> = {};
-  for (const d of docs) {
-    if (!out[d.group]) out[d.group] = {};
-    out[d.group][d.key] = d.value;
-  }
-  return out;
+  return cacheService.getOrSet("public:settings", 300, async () => {
+    const docs = await WebsiteSettingModel.find().lean();
+    const out: Record<string, Record<string, unknown>> = {};
+    for (const d of docs) {
+      if (!out[d.group]) out[d.group] = {};
+      out[d.group][d.key] = d.value;
+    }
+    return out;
+  });
 }
 
 export async function getSEO(page: string) {
-  const doc = await SEOSettingModel.findOne({ page }).lean();
-  if (!doc) return SEOSettingModel.findOne({ page: "global" }).lean();
-  return doc;
+  return cacheService.getOrSet(`public:seo:${page}`, 300, async () => {
+    const doc = await SEOSettingModel.findOne({ page }).lean();
+    if (!doc) return SEOSettingModel.findOne({ page: "global" }).lean();
+    return doc;
+  });
 }
 
 export const getPublicSettings = asyncHandler(async (_req: Request, res: Response) => {
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=86400");
   const settings = await getSettings();
   res.status(200).json({ success: true, data: settings });
 });
 
 export const getSiteBundle = asyncHandler(async (_req: Request, res: Response) => {
-  const [settings, services, portfolio, team, testimonials, faqs, seo] = await Promise.all([
-    getSettings(),
-    ServiceModel.find({ published: true }).sort({ order: 1 }).lean(),
-    PortfolioProjectModel.find({ status: "published" }).sort({ order: 1 }).lean(),
-    TeamMemberModel.find({ published: true }).sort({ order: 1 }).lean(),
-    TestimonialModel.find({ published: true }).sort({ order: 1 }).lean(),
-    FAQModel.find({ published: true }).sort({ order: 1 }).lean(),
-    getSEO("home"),
-  ]);
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=86400");
+  const bundle = await cacheService.getOrSet("public:site_bundle", 300, async () => {
+    const [settings, services, portfolio, team, testimonials, faqs, seo] = await Promise.all([
+      getSettings(),
+      ServiceModel.find({ published: true }).sort({ order: 1 }).lean(),
+      PortfolioProjectModel.find({ status: "published" }).sort({ order: 1 }).lean(),
+      TeamMemberModel.find({ published: true }).sort({ order: 1 }).lean(),
+      TestimonialModel.find({ published: true }).sort({ order: 1 }).lean(),
+      FAQModel.find({ published: true }).sort({ order: 1 }).lean(),
+      getSEO("home"),
+    ]);
+    return { settings, services, portfolio, team, testimonials, faqs, seo };
+  });
+
   res.status(200).json({
     success: true,
-    data: { settings, services, portfolio, team, testimonials, faqs, seo },
+    data: bundle,
   });
 });
 
 export const getHomeBundle = asyncHandler(async (_req: Request, res: Response) => {
-  const [settings, services, portfolio, team, testimonials, faqs, seo] = await Promise.all([
-    getSettings(),
-    ServiceModel.find({ published: true }).sort({ order: 1 }).limit(12).lean(),
-    PortfolioProjectModel.find({ status: "published" }).sort({ order: 1 }).limit(9).lean(),
-    TeamMemberModel.find({ published: true }).sort({ order: 1 }).limit(12).lean(),
-    TestimonialModel.find({ published: true }).sort({ order: 1 }).lean(),
-    FAQModel.find({ published: true }).sort({ order: 1 }).lean(),
-    getSEO("home"),
-  ]);
-  res.status(200).json({ success: true, data: { settings, services, portfolio, team, testimonials, faqs, seo } });
+  res.setHeader("Cache-Control", "public, max-age=60, s-maxage=300, stale-while-revalidate=86400");
+  const bundle = await cacheService.getOrSet("public:home_bundle", 300, async () => {
+    const [settings, services, portfolio, team, testimonials, faqs, seo] = await Promise.all([
+      getSettings(),
+      ServiceModel.find({ published: true }).sort({ order: 1 }).limit(12).lean(),
+      PortfolioProjectModel.find({ status: "published" }).sort({ order: 1 }).limit(9).lean(),
+      TeamMemberModel.find({ published: true }).sort({ order: 1 }).limit(12).lean(),
+      TestimonialModel.find({ published: true }).sort({ order: 1 }).lean(),
+      FAQModel.find({ published: true }).sort({ order: 1 }).lean(),
+      getSEO("home"),
+    ]);
+    return { settings, services, portfolio, team, testimonials, faqs, seo };
+  });
+
+  res.status(200).json({ success: true, data: bundle });
 });
 
 export const listServices = asyncHandler(async (_req: Request, res: Response) => {

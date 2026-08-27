@@ -359,3 +359,76 @@ export const createPaymentSchema = z.object({
   // Bypass the duplicate active-request guard for the same lead.
   force: z.boolean().optional().default(false),
 });
+
+// ---------- Agreements ----------
+
+export const createAgreementSchema = z.object({
+  client: z.object({
+    name: z.string().trim().min(2, "Client name is required").max(120),
+    phone: z.string().trim().min(5, "Client phone is required").max(30),
+    email: emailSchema,
+    address: z.string().trim().max(500).optional().default(""),
+    company: z.string().trim().max(200).optional().default(""),
+    leadId: z.string().regex(/^[a-fA-F0-9]{24}$/).optional().or(z.literal("")),
+  }),
+  project: z.object({
+    name: z.string().trim().min(2, "Project name is required").max(200),
+    description: z.string().trim().max(2000).optional().default(""),
+    scope: z.string().trim().max(20000).optional().default(""),
+    totalAmount: z.number().min(0, "Total amount cannot be negative"),
+    currency: z.string().length(3).optional().default("INR"),
+    advancePercentage: z.number().min(0).max(100).optional().default(40),
+    advanceAmount: z.number().min(0).optional().default(0),
+    finalPercentage: z.number().min(0).max(100).optional().default(60),
+    finalAmount: z.number().min(0).optional().default(0),
+  }),
+  agreementDetails: z.object({
+    agreementDate: z.string().trim().min(1, "Agreement date is required"),
+    expiryDate: z.string().trim().max(50).optional().default(""),
+    title: z.string().trim().min(2, "Agreement title is required").max(200),
+    body: z.string().trim().min(10, "Agreement body is required"),
+    termsAndConditions: z.string().trim().max(50000).optional().default(""),
+    cancellationTerms: z.string().trim().max(20000).optional().default(""),
+    supportTerms: z.string().trim().max(20000).optional().default(""),
+    additionalNotes: z.string().trim().max(10000).optional().default(""),
+  }),
+  developer: z.object({
+    name: z.string().trim().min(2).max(120).optional().default("Aravindar C"),
+    phone: z.string().trim().max(30).optional().default("+91 7904006320"),
+    email: z.string().trim().max(120).optional().default("concept2deploytech@gmail.com"),
+    companyName: z.string().trim().max(200).optional().default("C2D Tech (Concept to Deploy)"),
+    companyAddress: z
+      .string()
+      .trim()
+      .max(500)
+      .optional()
+      .default("2/62 First Main Road, Ganesh Nagar, Kattur, Trichy-620019, Tamil Nadu, India"),
+    companyWebsite: z.string().trim().max(200).optional().default("https://c2dtech.com"),
+    logoUrl: z.string().max(500).optional().default(""),
+  }),
+  signing: z
+    .object({
+      mode: z.enum(["digital_signature", "cca_esign"]).optional().default("digital_signature"),
+      provider: z
+        .enum(["dsc_pkcs7", "emudhra", "protean", "cdac"])
+        .optional()
+        .default("dsc_pkcs7"),
+    })
+    .optional()
+    .default({ mode: "digital_signature", provider: "dsc_pkcs7" }),
+});
+
+export const updateAgreementSchema = createAgreementSchema.partial();
+
+export const clientSignAgreementSchema = z.object({
+  signerName: z.string().trim().min(2, "Signer name must be at least 2 characters").max(120),
+  signerEmail: emailSchema.optional().or(z.literal("")),
+  signerPhone: z.string().trim().min(5, "Valid phone number required").max(30),
+  signatureImage: z.string().max(500000).optional(),
+  signatureType: z.enum(["drawn", "typed"]).optional().default("drawn"),
+  signingProvider: z.enum(["dsc_pkcs7", "emudhra", "protean", "cdac"]).optional().default("dsc_pkcs7"),
+  confirmRead: z.boolean().optional(),
+  certificatePin: z.string().max(64).optional(),
+  otpToken: z.string().max(20).optional(),
+});
+

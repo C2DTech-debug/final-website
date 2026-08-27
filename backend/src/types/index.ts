@@ -103,6 +103,12 @@ export const ROLE_PERMISSIONS: Record<string, string[]> = {
     "payments:link_create",
     "payments:send_whatsapp",
     "payments:resend_whatsapp",
+    "agreements:view",
+    "agreements:create",
+    "agreements:update",
+    "agreements:delete",
+    "agreements:sign_link",
+    "agreements:download",
   ],
   marketing_manager: [
     "dashboard:view",

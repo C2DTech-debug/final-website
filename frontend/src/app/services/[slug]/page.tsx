@@ -57,22 +57,19 @@ export default async function ServiceDetailsPage({ params }: Props) {
           </nav>
           <div className="grid items-center gap-10 lg:grid-cols-2">
             <Reveal>
-              <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-primary">
-                {service.category}
-              </span>
-              <h1 className="mt-4 font-display text-4xl font-bold tracking-tight md:text-5xl">{service.name}</h1>
+              <h1 className="font-display text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-5xl">{service.name}</h1>
               {service.tagline && <p className="mt-3 text-lg font-medium text-primary">{service.tagline}</p>}
               <p className="mt-4 max-w-xl text-muted-foreground md:text-lg">{service.shortDescription}</p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/estimator"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-7 font-semibold text-white shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+                  className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#4274D9] px-6 font-bold text-white shadow-sm transition-all duration-200 hover:bg-[#3462c7] hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]"
                 >
                   Get a Quote <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl border bg-background px-7 font-semibold transition-colors hover:border-primary/50"
+                  className="inline-flex h-11 items-center gap-2 rounded-lg border-2 border-[#95CCDD] bg-white px-6 font-bold text-[#293681] shadow-sm transition-all duration-200 hover:border-[#4274D9] hover:bg-[#D0E7E6]/30 hover:text-[#4274D9] hover:shadow-sm hover:-translate-y-0.5 active:scale-[0.99] dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                 >
                   Talk to Us
                 </Link>
@@ -84,8 +81,8 @@ export default async function ServiceDetailsPage({ params }: Props) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={service.image} alt={service.name} className="aspect-[16/10] w-full object-cover" />
                 ) : (
-                  <div className="flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-violet-600/30 via-fuchsia-500/20 to-cyan-500/30">
-                    <ServiceIcon icon={service.icon} className="h-24 w-24 text-white/70" />
+                  <div className="flex aspect-[16/10] w-full items-center justify-center bg-[#293681]">
+                    <ServiceIcon icon={service.icon} className="h-24 w-24 text-[#95CCDD]" />
                   </div>
                 )}
               </div>

@@ -16,13 +16,13 @@ export function SiteChrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
+  const isExcluded = pathname.startsWith("/admin") || pathname.startsWith("/agreement");
 
   return (
     <>
-      {isAdmin ? null : navbar}
+      {isExcluded ? null : navbar}
       <main className="flex-1">{children}</main>
-      {isAdmin ? null : footer}
+      {isExcluded ? null : footer}
     </>
   );
 }
