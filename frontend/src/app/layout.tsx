@@ -32,7 +32,15 @@ export const viewport: Viewport = {
   ],
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.c2dtech.com";
+function resolvePublicBase(): string {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!envUrl || envUrl.includes("onrender.com") || envUrl.includes("localhost") || !envUrl.includes("c2dtech.com")) {
+    return "https://www.c2dtech.com";
+  }
+  return envUrl.replace(/\/$/, "");
+}
+
+const SITE_URL = resolvePublicBase();
 const SITE_TITLE = "C2D Tech (Concept to Deploy) — Websites, Mobile Apps & AI Automation";
 const SITE_DESCRIPTION =
   "C2D Tech (Concept to Deploy) — a developer friends squad in Trichy building premium websites, mobile apps, AI automation, cloud & DevOps solutions. From concept to deploy in 6 streamlined steps.";

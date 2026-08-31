@@ -1,8 +1,16 @@
 import type { MetadataRoute } from "next";
 import type { Blog, Job } from "@/types";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.c2dtech.com";
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+function resolvePublicBase(): string {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!envUrl || envUrl.includes("onrender.com") || envUrl.includes("localhost") || !envUrl.includes("c2dtech.com")) {
+    return "https://www.c2dtech.com";
+  }
+  return envUrl.replace(/\/$/, "");
+}
+
+const BASE = resolvePublicBase();
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://c2dtech-backend.onrender.com";
 
 const STATIC_ROUTES = [
   "",
