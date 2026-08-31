@@ -60,11 +60,15 @@ export const metadata: Metadata = {
   applicationName: "C2D Tech",
   icons: {
     icon: [
-      { url: "/brand-logo.png", type: "image/png" },
-      { url: "/favicon.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/brand-logo.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/brand-logo.png",
-    apple: "/brand-logo.png",
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+      { url: "/apple-icon.png", sizes: "180x180" },
+    ],
   },
   openGraph: {
     type: "website",
@@ -94,9 +98,35 @@ export const metadata: Metadata = {
   },
 };
 
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "C2D Tech",
+  alternateName: "Concept to Deploy",
+  url: "https://www.c2dtech.com",
+  logo: "https://www.c2dtech.com/brand-logo.png",
+  image: "https://www.c2dtech.com/brand-logo.png",
+  sameAs: [
+    "https://www.instagram.com/c2dtech",
+    "https://www.linkedin.com/company/c2dtech",
+    "https://www.youtube.com/@c2dtech",
+    "https://github.com/c2dtech",
+    "https://twitter.com/c2dtech",
+  ],
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/brand-logo.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+      </head>
       <body className={`${inter.variable} ${plusJakartaSans.variable} font-sans`}>
         <Providers>
           <div className="relative flex min-h-screen flex-col">
