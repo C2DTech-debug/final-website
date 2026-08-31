@@ -13,15 +13,19 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { useSiteSettings } from "@/hooks/useSite";
 
 function Logo() {
+  const { data: settings } = useSiteSettings();
+  const customLogo = (settings?.company as Record<string, unknown> | undefined)?.logo as string | undefined;
+  const logoSrc = customLogo || "/brand-logo.png";
+
   return (
     <Link href="/" className="group flex items-center gap-2.5">
-      <span className="relative flex h-9 w-9 overflow-hidden rounded-xl bg-black shadow-sm transition-transform duration-200 group-hover:scale-105">
+      <span className="relative flex h-9 w-9 overflow-hidden rounded-xl bg-white border border-slate-200/90 dark:border-slate-800 dark:bg-slate-900 p-0.5 shadow-sm transition-transform duration-200 group-hover:scale-105">
         <Image
-          src="/brand-logo.png"
+          src={logoSrc}
           alt="C2D Tech"
           width={36}
           height={36}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-contain"
           priority
         />
       </span>

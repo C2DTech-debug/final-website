@@ -10,13 +10,13 @@ export function BrandedLoader({ label = "Loading your experience…", className 
   return (
     <div className={cn("flex flex-col items-center justify-center gap-5 py-10 text-center", className)} role="status" aria-live="polite">
       <div className="relative">
-        <span className="animate-c2d-float relative flex h-14 w-14 overflow-hidden items-center justify-center rounded-2xl bg-black shadow-md">
+        <span className="animate-c2d-float relative flex h-14 w-14 overflow-hidden items-center justify-center rounded-2xl bg-white border border-slate-200/90 dark:border-slate-800 dark:bg-slate-900 p-1 shadow-md">
           <Image
             src="/brand-logo.png"
             alt="C2D Tech"
             width={56}
             height={56}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-contain"
             priority
           />
         </span>

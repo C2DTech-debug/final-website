@@ -89,8 +89,8 @@ export default function AdminLoginPage() {
       <div className="absolute inset-0 -z-10 bg-grid-pattern bg-[size:56px_56px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_0%,black,transparent)]" />
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-black shadow-lg">
-            <Image src="/brand-logo.png" alt="C2D Admin" width={64} height={64} className="h-full w-full object-cover" priority />
+          <span className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white border border-slate-200/90 dark:border-slate-800 dark:bg-slate-900 p-1 shadow-lg">
+            <Image src="/brand-logo.png" alt="C2D Admin" width={64} height={64} className="h-full w-full object-contain" priority />
           </span>
           <h1 className="mt-4 font-display text-2xl font-bold">C2D Admin</h1>
           <p className="mt-1 text-sm text-muted-foreground">Sign in to the control panel</p>

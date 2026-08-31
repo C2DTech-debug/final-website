@@ -28,6 +28,7 @@ import {
 
 export const SITE_NAME = "C2D Tech";
 export const SITE_TAGLINE = "Developer Friends Squad in Trichy";
+export const SITE_URL = "https://www.c2dtech.com";
 
 export const NAV_LINKS = [
   { label: "Home", href: "/" },

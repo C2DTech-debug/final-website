@@ -48,8 +48,8 @@ export function AdminSidebar({
     <div className={cn("flex h-full flex-col border-r bg-muted/20", collapsed ? "w-16" : "w-64")}>
       <div className="flex h-16 items-center gap-2 border-b px-4">
         <Link href={home} className="flex items-center gap-2 overflow-hidden">
-          <span className="relative flex h-8 w-8 shrink-0 overflow-hidden items-center justify-center rounded-lg bg-black">
-            <Image src="/brand-logo.png" alt="C2D Admin" width={32} height={32} className="h-full w-full object-cover" />
+          <span className="relative flex h-8 w-8 shrink-0 overflow-hidden items-center justify-center rounded-lg bg-white border border-slate-200/90 dark:border-slate-800 dark:bg-slate-900 p-0.5 shadow-xs">
+            <Image src="/brand-logo.png" alt="C2D Admin" width={32} height={32} className="h-full w-full object-contain" />
           </span>
           {!collapsed && <span className="font-display font-bold">C2D Admin</span>}
         </Link>
