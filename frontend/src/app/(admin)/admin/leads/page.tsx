@@ -4,10 +4,14 @@ import * as React from "react";
 import {
   CalendarClock,
   Download,
+  Edit,
   FileUp,
+  Globe,
   GripVertical,
   Mail,
   MapPin,
+  MessageSquare,
+  Pencil,
   Phone,
   Plus,
   Search,
@@ -150,11 +154,13 @@ function StatsCards() {
 function LeadTable({
   leads,
   onOpen,
+  onEdit,
   onDelete,
   onStatus,
 }: {
   leads: Lead[];
   onOpen: (lead: Lead) => void;
+  onEdit: (lead: Lead) => void;
   onDelete: (lead: Lead) => void;
   onStatus: (id: string, status: string) => void;
 }) {
@@ -233,7 +239,10 @@ function LeadTable({
                   <Button variant="ghost" size="icon" aria-label="Actions">⋯</Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onOpen(lead)}>View</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onOpen(lead)}>View details</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onEdit(lead)}>
+                    <Pencil className="mr-2 h-3.5 w-3.5" /> Edit lead
+                  </DropdownMenuItem>
                   <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDelete(lead)}>
                     Delete
                   </DropdownMenuItem>
@@ -313,7 +322,17 @@ function KanbanBoard({ onOpen }: { onOpen: (lead: Lead) => void }) {
 
 // ---------- Detail sheet ----------
 
-function LeadDetailSheet({ leadId, open, onOpenChange }: { leadId: string | null; open: boolean; onOpenChange: (o: boolean) => void }) {
+function LeadDetailSheet({
+  leadId,
+  open,
+  onOpenChange,
+  onEdit,
+}: {
+  leadId: string | null;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onEdit?: (lead: Lead) => void;
+}) {
   const { data: lead, isLoading } = useLead(leadId ?? "");
   const { data: users } = useAdminUserOptions();
   const updateStatus = useUpdateLeadStatus();
@@ -411,8 +430,20 @@ function LeadDetailSheet({ leadId, open, onOpenChange }: { leadId: string | null
           <>
             <SheetHeader className="pb-4 text-left">
               <div className="flex items-center justify-between gap-2">
-                <SheetTitle>{lead.name}</SheetTitle>
-                <Badge variant="outline" className="text-xs">{lead.leadId}</Badge>
+                <SheetTitle className="text-xl font-bold">{lead.name}</SheetTitle>
+                <div className="flex items-center gap-2">
+                  {onEdit && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 gap-1.5 text-xs font-medium"
+                      onClick={() => onEdit(lead)}
+                    >
+                      <Pencil className="h-3.5 w-3.5 text-primary" /> Edit lead
+                    </Button>
+                  )}
+                  <Badge variant="outline" className="text-xs">{lead.leadId}</Badge>
+                </div>
               </div>
               <div className="flex flex-wrap gap-2 pt-2">
                 <Select value={lead.status} onValueChange={handleStatus}>
@@ -432,18 +463,66 @@ function LeadDetailSheet({ leadId, open, onOpenChange }: { leadId: string | null
             </SheetHeader>
 
             <div className="space-y-4">
-              <div className="grid gap-2 text-sm">
-                {lead.email && (
-                  <p className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4" /> {lead.email}</p>
+              <div className="grid gap-2.5 rounded-xl border bg-muted/20 p-4 text-sm">
+                <div className="flex items-center gap-2.5 text-muted-foreground">
+                  <Mail className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-xs font-semibold text-foreground/80 min-w-[50px]">Email:</span>
+                  {lead.email ? (
+                    <a href={`mailto:${lead.email}`} className="font-medium text-foreground hover:underline">
+                      {lead.email}
+                    </a>
+                  ) : (
+                    <span className="italic text-muted-foreground/70">No email provided</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2.5 text-muted-foreground">
+                  <Phone className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-xs font-semibold text-foreground/80 min-w-[50px]">Phone:</span>
+                  {lead.phone ? (
+                    <a href={`tel:${lead.phone}`} className="font-medium text-foreground hover:underline">
+                      {lead.phone}
+                    </a>
+                  ) : (
+                    <span className="italic text-muted-foreground/70">No phone provided</span>
+                  )}
+                </div>
+                {lead.whatsapp && (
+                  <div className="flex items-center gap-2.5 text-muted-foreground">
+                    <MessageSquare className="h-4 w-4 shrink-0 text-emerald-500" />
+                    <span className="text-xs font-semibold text-foreground/80 min-w-[50px]">WhatsApp:</span>
+                    <a
+                      href={`https://wa.me/${lead.whatsapp.replace(/[^0-9]/g, "")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-foreground hover:underline"
+                    >
+                      {lead.whatsapp}
+                    </a>
+                  </div>
                 )}
-                {lead.phone && (
-                  <p className="flex items-center gap-2 text-muted-foreground"><Phone className="h-4 w-4" /> {lead.phone}</p>
+                {lead.website && (
+                  <div className="flex items-center gap-2.5 text-muted-foreground">
+                    <Globe className="h-4 w-4 shrink-0 text-primary" />
+                    <span className="text-xs font-semibold text-foreground/80 min-w-[50px]">Website:</span>
+                    <a
+                      href={lead.website.startsWith("http") ? lead.website : `https://${lead.website}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-foreground hover:underline truncate"
+                    >
+                      {lead.website}
+                    </a>
+                  </div>
                 )}
-                {(lead.city || lead.state) && (
-                  <p className="flex items-center gap-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" /> {[lead.city, lead.state, lead.country].filter(Boolean).join(", ")}
-                  </p>
-                )}
+                <div className="flex items-center gap-2.5 text-muted-foreground">
+                  <MapPin className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="text-xs font-semibold text-foreground/80 min-w-[50px]">Location:</span>
+                  <span>
+                    {[lead.address, lead.city, lead.state, lead.country].filter(Boolean).join(", ") || (
+                      <span className="italic text-muted-foreground/70">No location specified</span>
+                    )}
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 rounded-xl border p-4 text-sm sm:grid-cols-3">
@@ -608,6 +687,178 @@ function DuplicatesPanel() {
   );
 }
 
+// ---------- Edit lead ----------
+
+function EditLeadDialog({
+  lead,
+  open,
+  onOpenChange,
+}: {
+  lead: Lead | null;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const update = useUpdateLead();
+  const [form, setForm] = React.useState({
+    name: "",
+    company: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "India",
+    businessType: "",
+    website: "",
+    service: "",
+    budget: "",
+    priority: "medium",
+    source: "manual",
+    status: "new",
+  });
+
+  React.useEffect(() => {
+    if (lead && open) {
+      setForm({
+        name: lead.name || "",
+        company: lead.company || "",
+        email: lead.email || "",
+        phone: lead.phone || "",
+        whatsapp: lead.whatsapp || "",
+        address: lead.address || "",
+        city: lead.city || "",
+        state: lead.state || "",
+        country: lead.country || "India",
+        businessType: lead.businessType || "",
+        website: lead.website || "",
+        service: lead.service || "",
+        budget: lead.budget || "",
+        priority: lead.priority || "medium",
+        source: lead.source || "manual",
+        status: lead.status || "new",
+      });
+    }
+  }, [lead, open]);
+
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handleSubmit = async () => {
+    if (!lead) return;
+    if (!form.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    try {
+      await update.mutateAsync({
+        id: lead._id,
+        body: form,
+      });
+      toast.success("Lead details updated");
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Update failed");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Pencil className="h-4 w-4 text-primary" />
+            Edit Lead · {lead?.leadId}
+          </DialogTitle>
+          <DialogDescription>Update contact information, company email, and deal details.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-2 sm:grid-cols-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label className="text-xs font-semibold">Lead / Contact Name *</Label>
+            <Input value={form.name} onChange={set("name")} placeholder="e.g. Kuchice Anna Nagar" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Company Name</Label>
+            <Input value={form.company} onChange={set("company")} placeholder="e.g. Kuchice Pvt Ltd" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Company / Contact Email</Label>
+            <Input type="email" value={form.email} onChange={set("email")} placeholder="e.g. info@company.com" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Phone Number</Label>
+            <Input value={form.phone} onChange={set("phone")} placeholder="e.g. +91 91501 52058" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">WhatsApp Number</Label>
+            <Input value={form.whatsapp} onChange={set("whatsapp")} placeholder="e.g. +91 91501 52058" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Service Required</Label>
+            <Input value={form.service} onChange={set("service")} placeholder="e.g. Website Development" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Budget (₹)</Label>
+            <Input value={form.budget} onChange={set("budget")} placeholder="e.g. ₹50,000" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Priority</Label>
+            <Select value={form.priority} onValueChange={(v) => setForm((f) => ({ ...f, priority: v }))}>
+              <SelectTrigger className="text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_PRIORITIES.map((p) => (
+                  <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Status</Label>
+            <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}>
+              <SelectTrigger className="text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {LEAD_STATUS.map((s) => (
+                  <SelectItem key={s} value={s}>{LEAD_STATUS_LABELS[s]}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Business Type</Label>
+            <Input value={form.businessType} onChange={set("businessType")} placeholder="e.g. Retail / Restaurant" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Website</Label>
+            <Input value={form.website} onChange={set("website")} placeholder="https://..." />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label className="text-xs font-semibold">Address / Street</Label>
+            <Input value={form.address} onChange={set("address")} placeholder="e.g. Anna Nagar 2nd Avenue" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">City</Label>
+            <Input value={form.city} onChange={set("city")} placeholder="e.g. Chennai" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">State</Label>
+            <Input value={form.state} onChange={set("state")} placeholder="e.g. Tamil Nadu" />
+          </div>
+        </div>
+        <DialogFooter className="mt-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={update.isPending}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={update.isPending}>
+            {update.isPending ? <Spinner /> : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ---------- Create lead ----------
 
 function CreateLeadDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
@@ -617,8 +868,13 @@ function CreateLeadDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
     company: "",
     email: "",
     phone: "",
+    whatsapp: "",
+    address: "",
     city: "",
     state: "",
+    country: "India",
+    businessType: "",
+    website: "",
     service: "",
     budget: "",
     priority: "medium",
@@ -628,7 +884,24 @@ function CreateLeadDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 
   React.useEffect(() => {
     if (open) {
-      setForm({ name: "", company: "", email: "", phone: "", city: "", state: "", service: "", budget: "", priority: "medium", source: "manual", status: "new" });
+      setForm({
+        name: "",
+        company: "",
+        email: "",
+        phone: "",
+        whatsapp: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "India",
+        businessType: "",
+        website: "",
+        service: "",
+        budget: "",
+        priority: "medium",
+        source: "manual",
+        status: "new",
+      });
     }
   }, [open]);
 
@@ -651,64 +924,83 @@ function CreateLeadDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>New lead</DialogTitle>
-          <DialogDescription>Add a lead manually to the pipeline.</DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <Plus className="h-4 w-4 text-primary" />
+            New Lead
+          </DialogTitle>
+          <DialogDescription>Add a lead manually with contact info and company email.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-2 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Name *</Label>
-            <Input value={form.name} placeholder="Contact name" onChange={set("name")} />
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label className="text-xs font-semibold">Lead / Contact Name *</Label>
+            <Input value={form.name} placeholder="e.g. Kuchice Anna Nagar" onChange={set("name")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Company</Label>
-            <Input value={form.company} placeholder="Company" onChange={set("company")} />
+            <Label className="text-xs font-semibold">Company Name</Label>
+            <Input value={form.company} placeholder="e.g. Kuchice Pvt Ltd" onChange={set("company")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Email</Label>
-            <Input value={form.email} placeholder="you@company.com" onChange={set("email")} />
+            <Label className="text-xs font-semibold">Company / Contact Email</Label>
+            <Input type="email" value={form.email} placeholder="e.g. info@company.com" onChange={set("email")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Phone</Label>
-            <Input value={form.phone} placeholder="+91 …" onChange={set("phone")} />
+            <Label className="text-xs font-semibold">Phone Number</Label>
+            <Input value={form.phone} placeholder="e.g. +91 91501 52058" onChange={set("phone")} />
           </div>
           <div className="space-y-1.5">
-            <Label>City</Label>
-            <Input value={form.city} placeholder="Trichy" onChange={set("city")} />
+            <Label className="text-xs font-semibold">WhatsApp Number</Label>
+            <Input value={form.whatsapp} placeholder="e.g. +91 91501 52058" onChange={set("whatsapp")} />
           </div>
           <div className="space-y-1.5">
-            <Label>State</Label>
-            <Input value={form.state} placeholder="Tamil Nadu" onChange={set("state")} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Service</Label>
+            <Label className="text-xs font-semibold">Service Required</Label>
             <Input value={form.service} placeholder="e.g. Website Development" onChange={set("service")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Budget</Label>
-            <Input value={form.budget} placeholder="₹2L – ₹5L" onChange={set("budget")} />
+            <Label className="text-xs font-semibold">Budget (₹)</Label>
+            <Input value={form.budget} placeholder="e.g. ₹50,000" onChange={set("budget")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Priority</Label>
+            <Label className="text-xs font-semibold">Priority</Label>
             <Select value={form.priority} onValueChange={(v) => setForm((f) => ({ ...f, priority: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {LEAD_PRIORITIES.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label>Source</Label>
+            <Label className="text-xs font-semibold">Source</Label>
             <Select value={form.source} onValueChange={(v) => setForm((f) => ({ ...f, source: v }))}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger className="text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {LEAD_SOURCES.map((s) => <SelectItem key={s} value={s}>{LEAD_SOURCE_LABELS[s] ?? s}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Business Type</Label>
+            <Input value={form.businessType} placeholder="e.g. Retail / Restaurant" onChange={set("businessType")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">Website</Label>
+            <Input value={form.website} placeholder="https://..." onChange={set("website")} />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label className="text-xs font-semibold">Address / Street</Label>
+            <Input value={form.address} placeholder="e.g. Anna Nagar 2nd Avenue" onChange={set("address")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">City</Label>
+            <Input value={form.city} placeholder="Chennai" onChange={set("city")} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold">State</Label>
+            <Input value={form.state} placeholder="Tamil Nadu" onChange={set("state")} />
+          </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={create.isPending}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={create.isPending}>
             {create.isPending ? <Spinner /> : "Create lead"}
@@ -729,6 +1021,7 @@ export default function AdminLeadsPage() {
   const [priority, setPriority] = React.useState<string>("");
   const [source, setSource] = React.useState<string>("");
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [editingLead, setEditingLead] = React.useState<Lead | null>(null);
   const [detailOpen, setDetailOpen] = React.useState(false);
   const [deleting, setDeleting] = React.useState<Lead | null>(null);
   const [createOpen, setCreateOpen] = React.useState(false);
@@ -746,6 +1039,10 @@ export default function AdminLeadsPage() {
   const handleOpen = (lead: Lead) => {
     setSelectedId(lead._id);
     setDetailOpen(true);
+  };
+
+  const handleEdit = (lead: Lead) => {
+    setEditingLead(lead);
   };
 
   const handleDelete = async () => {
@@ -881,7 +1178,13 @@ export default function AdminLeadsPage() {
             ) : rows.length === 0 ? (
               <EmptyState title="No leads found" description="Try adjusting your filters, or add a new lead." />
             ) : (
-              <LeadTable leads={rows} onOpen={handleOpen} onDelete={setDeleting} onStatus={handleStatus} />
+              <LeadTable
+                leads={rows}
+                onOpen={handleOpen}
+                onEdit={handleEdit}
+                onDelete={setDeleting}
+                onStatus={handleStatus}
+              />
             )}
           </div>
 
@@ -906,8 +1209,20 @@ export default function AdminLeadsPage() {
         <DuplicatesPanel />
       </div>
 
-      <LeadDetailSheet leadId={selectedId} open={detailOpen} onOpenChange={setDetailOpen} />
+      <LeadDetailSheet
+        leadId={selectedId}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onEdit={(lead) => {
+          setEditingLead(lead);
+        }}
+      />
       <CreateLeadDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <EditLeadDialog
+        lead={editingLead}
+        open={Boolean(editingLead)}
+        onOpenChange={(o) => !o && setEditingLead(null)}
+      />
 
       <ConfirmDialog
         open={Boolean(deleting)}
