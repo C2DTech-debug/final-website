@@ -74,9 +74,11 @@ export const createLead = asyncHandler(async (req: Request, res: Response) => {
     ...body,
     source: body.source || "manual",
     createdBy: req.user!._id,
+    createdByName: req.user!.name || "Admin",
     assignedTo: body.assignedTo || null,
-    timeline: [{ action: "created", description: "Lead created", by: req.user!._id, byName: req.user!.name }],
+    timeline: [{ action: "created", description: `Lead created by ${req.user!.name || "Admin"}`, by: req.user!._id, byName: req.user!.name }],
   });
+  await lead.populate(POPULATE);
   await logActivity({ user: req.user, action: "create", entity: "lead", entityId: lead._id, description: `Created lead ${lead.leadId} (${lead.name})`, req });
   res.status(201).json({ success: true, data: lead });
 });
@@ -96,6 +98,7 @@ export const updateLead = asyncHandler(async (req: Request, res: Response) => {
     doc.timeline.push({ action: "follow_up", description: `Follow-up scheduled for ${new Date(body.followUpDate).toLocaleDateString()}`, by: req.user!._id, byName: req.user!.name });
   }
   await doc.save();
+  await doc.populate(POPULATE);
 
   await logActivity({ user: req.user, action: "update", entity: "lead", entityId: req.params.id, description: `Updated lead ${doc.leadId} (${doc.name})`, req });
   res.status(200).json({ success: true, data: doc });
@@ -246,7 +249,7 @@ export const kanbanBoard = asyncHandler(async (req: Request, res: Response) => {
   if (source) filter.source = source;
   if (assignedTo) filter.assignedTo = assignedTo;
 
-  const leads = await LeadModel.find(filter).sort({ updatedAt: -1 }).populate("assignedTo", "name email").lean();
+  const leads = await LeadModel.find(filter).sort({ updatedAt: -1 }).populate(POPULATE).lean();
   const columns = LEAD_STATUSES.map((status) => ({
     status,
     leads: leads.filter((l) => l.status === status),

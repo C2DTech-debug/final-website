@@ -311,6 +311,8 @@ export const leadSchema = z.object({
   tags: z.array(z.string().max(60)).optional().default([]),
 });
 
+export const leadUpdateSchema = leadSchema.partial();
+
 export const leadStatusSchema = z.object({
   status: z.enum(["new", "contacted", "qualified", "proposal_sent", "negotiation", "follow_up", "won", "lost", "on_hold"]),
 });

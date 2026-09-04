@@ -621,6 +621,7 @@ export interface Lead {
   source: string;
   assignedTo?: { _id: string; name: string; email: string } | string | null;
   createdBy?: { _id: string; name: string; email: string } | string | null;
+  createdByName?: string;
   status: string;
   expectedClosingDate: string | null;
   followUpDate: string | null;

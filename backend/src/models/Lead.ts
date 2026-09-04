@@ -76,6 +76,7 @@ const leadSchema = new Schema(
     lastContactedAt: { type: Date, default: null },
     tags: [{ type: String, index: true }],
     createdBy: { type: Schema.Types.ObjectId, ref: "AdminUser", default: null },
+    createdByName: { type: String, default: "" },
     attachments: [attachmentSchema],
     timeline: [timelineEntrySchema],
     referrer: { type: String, default: "" },

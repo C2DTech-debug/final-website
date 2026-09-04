@@ -102,6 +102,15 @@ function priorityColor(priority: string): string {
   return LEAD_PRIORITIES.find((p) => p.value === priority)?.color || "bg-muted text-muted-foreground";
 }
 
+function formatLeadSource(lead: Lead): string {
+  const baseLabel = LEAD_SOURCE_LABELS[lead.source] ?? lead.source;
+  const creator = typeof lead.createdBy === "object" && lead.createdBy ? lead.createdBy.name : lead.createdByName;
+  if (lead.source === "manual") {
+    return creator ? `Manual (by ${creator})` : "Manual";
+  }
+  return creator ? `${baseLabel} (by ${creator})` : baseLabel;
+}
+
 // ---------- Stats ----------
 
 function StatsCards() {
@@ -180,7 +189,7 @@ function LeadTable({
             <TableCell>
               <p className="font-medium">{lead.name}</p>
               <p className="text-xs text-muted-foreground">
-                {lead.leadId} · {lead.email || lead.phone || "—"}
+                {lead.leadId} · {lead.email || lead.phone || "—"} · <span className="font-medium text-foreground/80">{formatLeadSource(lead)}</span>
               </p>
             </TableCell>
             <TableCell className="text-sm">{lead.service || "—"}</TableCell>
@@ -290,7 +299,7 @@ function KanbanBoard({ onOpen }: { onOpen: (lead: Lead) => void }) {
                 <p className="mt-1 truncate text-xs text-muted-foreground">{lead.email || lead.phone || "—"}</p>
                 {lead.service && <p className="mt-1 text-xs text-muted-foreground">{lead.service}</p>}
                 <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{assignedName(lead)}</span>
+                  <span className="truncate max-w-[130px]">{formatLeadSource(lead)}</span>
                   <span>{timeAgo(lead.createdAt)}</span>
                 </div>
               </div>
@@ -441,7 +450,7 @@ function LeadDetailSheet({ leadId, open, onOpenChange }: { leadId: string | null
                 <div><p className="text-xs text-muted-foreground">Company</p><p className="font-medium">{lead.company || "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Service</p><p className="font-medium">{lead.service || "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Budget</p><p className="font-medium">{lead.budget || "—"}</p></div>
-                <div><p className="text-xs text-muted-foreground">Source</p><p className="font-medium">{LEAD_SOURCE_LABELS[lead.source] ?? lead.source}</p></div>
+                <div><p className="text-xs text-muted-foreground">Source</p><p className="font-medium">{formatLeadSource(lead)}</p></div>
                 <div><p className="text-xs text-muted-foreground">Business type</p><p className="font-medium">{lead.businessType || "—"}</p></div>
                 <div><p className="text-xs text-muted-foreground">Created</p><p className="font-medium">{formatDate(lead.createdAt)}</p></div>
               </div>

@@ -5,7 +5,7 @@ import { uploadFile, multerErrorHandler } from "../middleware/upload";
 import { validate } from "../utils/asyncHandler";
 import {
   contactStatusSchema, estimateStatusSchema, replySchema, serviceSchema, portfolioSchema, teamMemberSchema, testimonialSchema, faqSchema, seoSettingSchema,
-  blogSchema, jobSchema, jobApplicationStatusSchema, leadSchema, leadStatusSchema, leadNoteSchema, leadTransferSchema, leadTimelineSchema,
+  blogSchema, jobSchema, jobApplicationStatusSchema, leadSchema, leadUpdateSchema, leadStatusSchema, leadNoteSchema, leadTransferSchema, leadTimelineSchema,
   notificationMarkSchema, roleSchema,
 } from "../schemas";
 import {
@@ -109,7 +109,8 @@ router.post("/leads/merge", authenticate, requirePermission("leads:update"), mer
 router.post("/leads/import", authenticate, requirePermission("leads:create"), uploadFile("imports", { fieldName: "file", maxSizeMb: 10, allowed: ["spreadsheet"] }), multerErrorHandler, importLeadsFile);
 router.get("/leads/:id", authenticate, requirePermission("leads:view"), getLead);
 router.post("/leads", authenticate, requirePermission("leads:create"), validate(leadSchema), createLead);
-router.put("/leads/:id", authenticate, requirePermission("leads:update"), validate(leadSchema), updateLead);
+router.put("/leads/:id", authenticate, requirePermission("leads:update"), validate(leadUpdateSchema), updateLead);
+router.patch("/leads/:id", authenticate, requirePermission("leads:update"), validate(leadUpdateSchema), updateLead);
 router.delete("/leads/:id", authenticate, requirePermission("leads:delete"), deleteLead);
 router.patch("/leads/:id/status", authenticate, requirePermission("leads:update"), validate(leadStatusSchema), updateLeadStatus);
 router.patch("/leads/:id/assign", authenticate, requirePermission("leads:assign"), validate(leadTransferSchema), assignLead);
